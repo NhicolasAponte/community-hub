@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Community Hub
 
-## Getting Started
+Community Hub is a web application designed to promote local events and businesses. Users can explore upcoming events, discover vendors, and stay updated through a blog. The platform prioritizes SEO and smooth interactivity for an optimal user experience.
 
-First, run the development server:
+## Features
+- Event feed showcasing upcoming local events
+- Vendor directory with searchable services
+- List and calendar views for events
+- Blog for updates and announcements
+- Optimized for SEO and smooth UI interactions
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Installation
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Prerequisites
+- Node.js (latest LTS recommended)
+- npm or yarn
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Steps
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/yourusername/community-hub.git
+   cd community-hub
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   # or
+   yarn install
+   ```
+3. Start the development server:
+   ```sh
+   npm run dev
+   # or
+   yarn dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
+This project is designed for deployment on [Vercel](https://vercel.com/).
 
-## Learn More
+1. Install the Vercel CLI:
+   ```sh
+   npm install -g vercel
+   ```
+2. Run the following command and follow the setup instructions:
+   ```sh
+   vercel
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+## TODO List
+- [ ] Generate project skeleton
+- [ ] Initialize routing
+- [ ] Deploy to Vercel
+- [ ] Prototype client-side layouts
+- [ ] Create data model
+- [ ] Connect to database
+- [ ] Generate test data
+- [ ] Seed database
+- [ ] Create server actions
+- [ ] Add authentication
+- [ ] Create admin panel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
+This project is licensed under the MIT License.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
