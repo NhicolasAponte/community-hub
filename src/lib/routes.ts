@@ -23,10 +23,15 @@ export const VendorsPage = {
     href: "/vendors",
 }
 
-export const NavRoutes = [
-    HomePage,
-    AboutPage,
-    BlogPage,
-    EventsPage,
+export const MovingResourcesPage = {
+    label: "Moving to the Area?",
+    href: "/moving-resources",
+}
+
+export const NavHeaderRoutes = [
     VendorsPage,
+    EventsPage,
+    BlogPage,
+    AboutPage,
+    MovingResourcesPage,
 ]

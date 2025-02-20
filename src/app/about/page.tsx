@@ -2,8 +2,8 @@ import React from 'react'
 
 const AboutPage = () => {
   return (
-    <div>
-      about page 
+    <div className="flex flex-col items-center min-h-screen bg-gray-900 p-4 text-gray-200">
+      <main className="container items-center">about page</main> 
     </div>
   )
 }
