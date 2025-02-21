@@ -48,17 +48,19 @@ This project is designed for deployment on [Vercel](https://vercel.com/).
    ```
 
 ## TODO List
-- [ ] Generate project skeleton
-- [ ] Initialize routing
-- [ ] Deploy to Vercel
-- [ ] Prototype client-side layouts
+- [x] Generate project skeleton
+- [x] Initialize routing
+- [x] Prototype client-side layouts
+- [ ] preliminary styling to keep MVP smooth  
+- [ ] page components: event card, vendor card, blog card, event calendar view  
+- [ ] prototype admin portal
 - [ ] Create data model
-- [ ] Connect to database
 - [ ] Generate test data
+- [ ] Deploy to Vercel
+- [ ] Connect to database
 - [ ] Seed database
 - [ ] Create server actions
 - [ ] Add authentication
-- [ ] Create admin panel
 
 ## License
 This project is licensed under the MIT License.
