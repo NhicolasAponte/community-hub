@@ -22,6 +22,10 @@ body {
   @apply bg-gray-700;
 }
 
+.card-wrapper {
+  @apply grid gap-4 mt-6 w-full max-w-4xl;
+}
+
 .title {
   @apply text-2xl font-bold mb-4 text-green-300;
 }
