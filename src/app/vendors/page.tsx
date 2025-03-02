@@ -6,58 +6,46 @@ import React, { useState } from "react";
 const vendors: Vendor[] = [
   {
     id: 1,
-    name: "Joe's Catering",
-    service: "Food Catering",
-    contact: "joe@example.com",
+    name: "John's Plumbing",
+    description: "Expert plumbing services for all your needs.",
+    email: "john@example.com",
+    phone: "123-456-7890",
+    address: "123 Main St, Springfield, IL",
+    services: ["Sink Repair", "Pipe Installation", "Leak Detection"],
+    website: "https://johnsplumbing.com",
+    instagram: "https://instagram.com/johnsplumbing",
+    twitter: "https://twitter.com/johnsplumbing",
+    linkedin: "https://linkedin.com/company/johnsplumbing",
+    facebook: "https://facebook.com/johnsplumbing"
   },
   {
     id: 2,
-    name: "Luna Photography",
-    service: "Event Photography",
-    contact: "luna@example.com",
+    name: "Sally's Catering",
+    email: "sally@example.com",
+    description: "Delicious catering services for any event.",
+    phone: "987-654-3210",
+    address: "456 Elm St, Springfield, IL",
+    services: ["Catering", "Event Planning"],
+    website: "https://sallyscatering.com",
+    instagram: "https://instagram.com/sallyscatering",
+    twitter: "https://twitter.com/sallyscatering",
+    linkedin: "https://linkedin.com/company/sallyscatering",
+    facebook: "https://facebook.com/sallyscatering"
   },
   {
     id: 3,
-    name: "DJ Beats",
-    service: "Music and DJ Services",
-    contact: "djbeats@example.com",
-  },
-  {
-    id: 1,
-    name: "Joe's Catering",
-    service: "Food Catering",
-    contact: "joe@example.com",
-  },
-  {
-    id: 2,
-    name: "Luna Photography",
-    service: "Event Photography",
-    contact: "luna@example.com",
-  },
-  {
-    id: 3,
-    name: "DJ Beats",
-    service: "Music and DJ Services",
-    contact: "djbeats@example.com",
-  },
-  {
-    id: 1,
-    name: "Joe's Catering",
-    service: "Food Catering",
-    contact: "joe@example.com",
-  },
-  {
-    id: 2,
-    name: "Luna Photography",
-    service: "Event Photography",
-    contact: "luna@example.com",
-  },
-  {
-    id: 3,
-    name: "DJ Beats",
-    service: "Music and DJ Services",
-    contact: "djbeats@example.com",
-  },
+    name: "Mike's Landscaping",
+    email: "mike@example.com",
+    description: "Professional landscaping services to beautify your space.",
+    phone: "555-123-4567",
+    address: "789 Oak St, Springfield, IL",
+    services: ["Lawn Care", "Garden Design", "Tree Trimming"],
+    website: "https://mikeslandscaping.com",
+    instagram: "https://instagram.com/mikeslandscaping",
+    twitter: "https://twitter.com/mikeslandscaping",
+    linkedin: "https://linkedin.com/company/mikeslandscaping",
+    facebook: "https://facebook.com/mikeslandscaping"
+  }
 ];
 
 const VendorsPage = () => {
@@ -66,7 +54,7 @@ const VendorsPage = () => {
   const filteredVendors = vendors.filter(
     (vendor) =>
       vendor.name.toLowerCase().includes(search.toLowerCase()) ||
-      vendor.service.toLowerCase().includes(search.toLowerCase())
+      vendor.description.toLowerCase().includes(search.toLowerCase())
   );
 
   return (

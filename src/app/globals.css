@@ -11,7 +11,7 @@ body {
 }
 
 .card {
-  @apply p-4 rounded-lg shadow-md border border-gray-700;
+  @apply p-4 shadow-md;
 }
 
 .card-even {
