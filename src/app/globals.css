@@ -10,6 +10,14 @@ body {
   @apply min-h-screen min-w-max bg-gray-900 text-gray-200;
 }
 
+.page-content {
+  @apply p-6 flex flex-col items-center justify-center;
+}
+
+.form {
+  @apply flex flex-col w-full max-w-md rounded-lg p-4 space-y-4 bg-slate-100 text-black;
+}
+
 .card {
   @apply p-4 shadow-md;
 }
