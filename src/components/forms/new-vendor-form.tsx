@@ -23,17 +23,17 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const newVendorSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-  description: z.string().min(1, { message: "Description is required" }),
+  name: z.string().min(1, { message: "Enter the name of the Vendor" }),
+  description: z.string(),
   email: z.string().email({ message: "Invalid email address" }),
-  phone: z.string().min(1, { message: "Phone is required" }).nullable(),
-  address: z.string().min(1, { message: "Address is required" }).nullable(),
-  services: z.string().min(1, { message: "Services are required" }).nullable(),
-  website: z.string().url({ message: "Invalid URL" }).nullable(),
-  instagram: z.string().url({ message: "Invalid URL" }).nullable(),
-  twitter: z.string().url({ message: "Invalid URL" }).nullable(),
-  linkedin: z.string().url({ message: "Invalid URL" }).nullable(),
-  facebook: z.string().url({ message: "Invalid URL" }).nullable(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  services: z.string().optional(),
+  website: z.string().url().optional(),
+  instagram: z.string().url().optional(),
+  twitter: z.string().url().optional(),
+  linkedin: z.string().url().optional(),
+  facebook: z.string().url().optional(),
 });
 
 const NewVendorForm = () => {
@@ -43,18 +43,19 @@ const NewVendorForm = () => {
       name: "",
       description: "",
       email: "",
-      phone: "",
-      address: "",
-      services: "",
-      website: "",
-      instagram: "",
-      twitter: "",
-      linkedin: "",
-      facebook: "",
+      phone: undefined,
+      address: undefined,
+      services: undefined,
+      website: undefined,
+      instagram: undefined,
+      twitter: undefined,
+      linkedin: undefined,
+      facebook: undefined,
     },
   });
 
   function onSubmit(data: z.infer<typeof newVendorSchema>) {
+    console.log("DATA: ")
     console.log(data);
   }
 
@@ -138,7 +139,7 @@ const NewVendorForm = () => {
                   <Input
                     placeholder="Phone"
                     {...field}
-                    value={field.value ?? ""}
+                    value={field.value ?? undefined}
                   />
                 </FormControl>
                 <FormDescription>
@@ -159,7 +160,7 @@ const NewVendorForm = () => {
                 <Input
                   placeholder="Address"
                   {...field}
-                  value={field.value ?? ""}
+                  value={field.value ?? undefined}
                 />
               </FormControl>
               <FormDescription>
@@ -180,7 +181,7 @@ const NewVendorForm = () => {
                 <Input
                   placeholder="Website"
                   {...field}
-                  value={field.value ?? ""}
+                  value={field.value ?? undefined}
                 />
               </FormControl>
               <FormDescription>
@@ -201,7 +202,7 @@ const NewVendorForm = () => {
                   <Input
                     placeholder="Instagram"
                     {...field}
-                    value={field.value ?? ""}
+                    value={field.value ?? undefined}
                   />
                 </FormControl>
                 <FormDescription>
@@ -221,7 +222,7 @@ const NewVendorForm = () => {
                   <Input
                     placeholder="Twitter"
                     {...field}
-                    value={field.value ?? ""}
+                    value={field.value ?? undefined}
                   />
                 </FormControl>
                 <FormDescription>Twitter link of the vendor.</FormDescription>
@@ -239,7 +240,7 @@ const NewVendorForm = () => {
                   <Input
                     placeholder="LinkedIn"
                     {...field}
-                    value={field.value ?? ""}
+                    value={field.value ?? undefined}
                   />
                 </FormControl>
                 <FormDescription>LinkedIn of the vendor.</FormDescription>
@@ -257,7 +258,7 @@ const NewVendorForm = () => {
                   <Input
                     placeholder="Facebook"
                     {...field}
-                    value={field.value ?? ""}
+                    value={field.value ?? undefined}
                   />
                 </FormControl>
                 <FormDescription>Facebook of the vendor.</FormDescription>

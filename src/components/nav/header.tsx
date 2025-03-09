@@ -6,10 +6,24 @@ import { Button } from "../ui/button";
 
 export default function Header() {
   const pathName = usePathname();
+  // TODO: REMOVE ADMIN LINK 
   return (
     <header className="flex justify-between items-center p-4 bg-zinc-500 text-white">
       <div>
-        <Link href={HomePage.href}>Home</Link>
+        <div className="flex space-x-2">
+          <Link
+            href={HomePage.href}
+            className="hover:bg-black hover:text-slate-400 rounded-md p-2"
+          >
+            Home
+          </Link>
+          <Link
+            href="/misty-mountain"
+            className="hover:bg-black hover:text-slate-400 rounded-md p-2"
+          >
+            Admin
+          </Link>
+        </div>
       </div>
       <nav className="flex items-center space-x-4 lg:space-x-6 md:block">
         {NavHeaderRoutes.map((route, index) => (
