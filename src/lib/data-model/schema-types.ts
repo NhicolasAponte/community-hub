@@ -11,6 +11,8 @@ export type Vendor = {
     twitter: string;
     linkedin: string;
     facebook: string;
+    // use generic links: string[] and programmatically determine type of link 
+    // if the url contains "instagram" then it's an instagram link 
   }
 
   export type Event = {

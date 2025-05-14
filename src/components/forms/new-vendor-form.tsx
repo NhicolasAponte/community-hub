@@ -20,21 +20,9 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { newVendorSchema } from "@/lib/zod-schema/vendor-schema";
 import { z } from "zod";
-
-const newVendorSchema = z.object({
-  name: z.string().min(1, { message: "Enter the name of the Vendor" }),
-  description: z.string(),
-  email: z.string().email({ message: "Invalid email address" }),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  services: z.string().optional(),
-  website: z.string().url().optional(),
-  instagram: z.string().url().optional(),
-  twitter: z.string().url().optional(),
-  linkedin: z.string().url().optional(),
-  facebook: z.string().url().optional(),
-});
+import { createVendor } from "@/lib/actions/vendor-actions";
 
 const NewVendorForm = () => {
   const form = useForm<z.infer<typeof newVendorSchema>>({
@@ -46,22 +34,22 @@ const NewVendorForm = () => {
       phone: undefined,
       address: undefined,
       services: undefined,
-      website: undefined,
-      instagram: undefined,
-      twitter: undefined,
-      linkedin: undefined,
-      facebook: undefined,
+      links: undefined,
+      // instagram: undefined,
+      // twitter: undefined,
+      // linkedin: undefined,
+      // facebook: undefined,
     },
   });
 
-  function onSubmit(data: z.infer<typeof newVendorSchema>) {
-    console.log("DATA: ")
-    console.log(data);
-  }
-
+  // function onSubmit(data: z.infer<typeof newVendorSchema>) {
+  //   console.log("DATA: ")
+  //   console.log(data);
+  // }
+  // TODO: add error handling 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="form">
+      <form action={createVendor} className="form">
         <FormField
           control={form.control}
           name="name"
@@ -173,25 +161,25 @@ const NewVendorForm = () => {
 
         <FormField
           control={form.control}
-          name="website"
+          name="links"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Website</FormLabel>
+              <FormLabel>Links</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Website"
+                  placeholder="Links"
                   {...field}
                   value={field.value ?? undefined}
                 />
               </FormControl>
               <FormDescription>
-                Enter the website of the vendor.
+                Enter links for the vendor&#39;s website, social media, etc.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="instagram"
@@ -266,7 +254,7 @@ const NewVendorForm = () => {
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
         <Button type="submit">Save</Button>
       </form>
     </Form>
