@@ -6,13 +6,16 @@
  * @date 03-03-2025
  */
 "use server"
-import NewVendorForm from '@/components/forms/new-vendor-form'
 import React from 'react'
+import { fetchVendors } from '@/lib/actions/vendor-actions'
+import AdminClientWrapper from './client-wrapper'
 
-const AdminPage = () => {
+const AdminPage = async () => {
+  const vendors = await fetchVendors();
+
   return (
     <div className='page-content'>
-        <NewVendorForm />
+      <AdminClientWrapper vendors={vendors} />
     </div>
   )
 }

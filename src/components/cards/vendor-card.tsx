@@ -1,6 +1,6 @@
 import React from "react";
 import { Vendor } from "@/lib/data-model/schema-types";
-import Link from "next/link";
+import { Mail, MapPin, Phone } from "lucide-react"; // Import Lucide icons
 
 interface VendorCardProps {
   vendor: Vendor;
@@ -8,80 +8,48 @@ interface VendorCardProps {
 
 const VendorCard = ({ vendor }: VendorCardProps) => {
   return (
-    <div className=" hover:shadow-lg hover:scale-105 transition duration-100">
-      {/* <h2 className="text-green-300 font-semibold text-lg">{vendor.name}</h2> */}
+    <div className="hover:shadow-lg hover:scale-105 transition duration-100">
       <CardHeader title={vendor.name} />
       <CardContent>
-        <p className="text-gray-400">🛠 {vendor.description}</p>
+        <p className="text-gray-400">{vendor.description}</p>
         <div>
-          <ul className="flex flex-row flex-wrap gap-2 mt-2">
-            {vendor.services.map((service, index) => (
-              <li key={index} className="text-gray-400">
-                {index > 0 ? `| ${service}` : service}
-              </li>
-            ))}
-          </ul>
+          {vendor.services && vendor.services.split(",").length > 1 ? (
+            <>
+              <p className="text-gray-400">Services:</p>
+              <ul className="list-disc list-inside text-gray-400">
+                {vendor.services.split(",").map((service, index) => (
+                  <li key={index}>{service.trim()}</li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="text-gray-400">Services: {vendor.services}</p>
+          )}
         </div>
       </CardContent>
       <CardFooter>
         <div className="flex flex-col space-y-2">
-          <p className="text-gray-400">🏠 {vendor.address}</p>
-          <div className="flex space-x-2">
-            <p className="text-gray-400">📧 {vendor.email}</p>
-            <p className="text-gray-400">📞 {vendor.phone}</p>
-          </div>
-          <div className="flex space-x-2">
-            {vendor.website && (
-              <Link
-                href={vendor.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                🌐 Website
-              </Link>
-            )}
-            {vendor.instagram && (
-              <a
-                href={vendor.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                📸 Instagram
-              </a>
-            )}
-            {vendor.twitter && (
-              <a
-                href={vendor.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                🐦 Twitter
-              </a>
-            )}
-            {vendor.linkedin && (
-              <a
-                href={vendor.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                💼 LinkedIn
-              </a>
-            )}
-            {vendor.facebook && (
-              <a
-                href={vendor.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                📘 Facebook
-              </a>
-            )}
-          </div>
+          {/* Conditionally render Address */}
+          {vendor.address && (
+            <div className="flex items-center space-x-2">
+              <MapPin className="w-4 h-4 text-gray-400" />
+              <p className="text-gray-400">{vendor.address}</p>
+            </div>
+          )}
+          {/* Conditionally render Email */}
+          {vendor.email && (
+            <div className="flex items-center space-x-2">
+              <Mail className="w-4 h-4 text-gray-400" />
+              <p className="text-gray-400">{vendor.email}</p>
+            </div>
+          )}
+          {/* Conditionally render Phone */}
+          {vendor.phone && (
+            <div className="flex items-center space-x-2">
+              <Phone className="w-4 h-4 text-gray-400" />
+              <p className="text-gray-400">{vendor.phone}</p>
+            </div>
+          )}
         </div>
       </CardFooter>
     </div>

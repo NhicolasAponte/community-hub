@@ -1,16 +1,12 @@
 export type Vendor = {
-    id: number;
+    id: string;
     name: string;
     description: string;
-    services: string[];
-    email: string;
-    phone: string;
-    address: string;
-    website: string;
-    instagram: string;
-    twitter: string;
-    linkedin: string;
-    facebook: string;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+    services: string | null; // parse into string array 
+    links: string | null;
     // use generic links: string[] and programmatically determine type of link 
     // if the url contains "instagram" then it's an instagram link 
   }

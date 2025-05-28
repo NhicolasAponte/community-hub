@@ -45,8 +45,11 @@ const NewVendorForm = () => {
   // function onSubmit(data: z.infer<typeof newVendorSchema>) {
   //   console.log("DATA: ")
   //   console.log(data);
+  //   createVendor(data)
   // }
   // TODO: add error handling 
+  // action={createVendor}
+  // onSubmit={form.handleSubmit(onSubmit)}
   return (
     <Form {...form}>
       <form action={createVendor} className="form">
