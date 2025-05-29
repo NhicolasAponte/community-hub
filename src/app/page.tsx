@@ -1,3 +1,4 @@
+import InstagramCarousel from "@/components/main-page/carousel";
 
 const events = [
   {
@@ -21,7 +22,11 @@ const events = [
 ];
 export default function Home() {
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4 space-y-12">
+      {/* Instagram Carousel on top */}
+      <InstagramCarousel/>
+
+      {/* Then the events section below it */}
       <div className="w-full max-w-2xl p-4">
         <h1 className="text-2xl font-bold text-center mb-6">Upcoming Events</h1>
         <div className="space-y-4">
