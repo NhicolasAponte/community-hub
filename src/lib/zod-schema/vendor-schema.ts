@@ -14,6 +14,21 @@ export const newVendorSchema = z.object({
   // facebook: z.string().url().optional(),
 });
 
+/**
+ * Type for the vendor form data, inferred using Zod from the newVendorSchema.
+ */
+export type VendorFormData = z.infer<typeof newVendorSchema>; 
+
+export type VendorFormState = {
+    success: boolean;
+    message: string; 
+    errors?: Record<string, string[]>;
+    fields?: Record<string, string>;
+    // errors?: {
+    //     [key: string]: string[];
+    // }
+}
+
 export const vendorSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, { message: "Enter the name of the Vendor" }),

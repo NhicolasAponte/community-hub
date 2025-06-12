@@ -1,6 +1,6 @@
 /**
  * @fileoverview This file contains the client component NewVendorForm
- * @module components/forms/new-vendor-form
+ * @module components/forms/vendor-form
  * @author Nhicolas Aponte
  * @version 0.0.0
  * @date 03-03-2025
@@ -20,14 +20,37 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { newVendorSchema } from "@/lib/zod-schema/vendor-schema";
-import { z } from "zod";
+import {
+  newVendorSchema,
+  VendorFormData,
+  VendorFormState,
+} from "@/lib/zod-schema/vendor-schema";
 import { createVendor } from "@/lib/actions/vendor-actions";
+// import { useActionState } from "react"; // implement when migrating to Nextjs 15
+import { useFormStatus } from "react-dom";
+// import { useFormState } from "react-dom"; // deprecated, use useActionState instead
 
-const NewVendorForm = () => {
-  const form = useForm<z.infer<typeof newVendorSchema>>({
+interface VendorFormProps {
+  defaultValues?: VendorFormData;
+  // action: (previousState: VendorFormState, formData: FormData) => Promise<VendorFormState>;
+  action?: (data: VendorFormData) => Promise<VendorFormState>;
+  closeForm: () => void; // Optional prop to control visibility of the form 
+}
+
+// not needed when using react-hook-form with zod
+// const initialFormState: VendorFormState = {
+//   success: false,
+//   message: "",
+// }
+
+const VendorForm: React.FC<VendorFormProps> = ({
+  defaultValues,
+  action = createVendor,
+  closeForm,
+}) => {
+  const form = useForm<VendorFormData>({
     resolver: zodResolver(newVendorSchema),
-    defaultValues: {
+    defaultValues: defaultValues || {
       name: "",
       description: "",
       email: "",
@@ -40,19 +63,44 @@ const NewVendorForm = () => {
       // linkedin: undefined,
       // facebook: undefined,
     },
+    mode: "onBlur",
+    reValidateMode: "onChange",
   });
+  // Next.js 15 convention
+  // const [state, formAction, isPending] = useActionState(action, initialFormState)
+  // Next.js 14 convention
+  const { pending } = useFormStatus();
+  // formState is what the server returns after the server action is completed
+  // const [formState, formAction] = useFormState(action, initialFormState);
 
-  // function onSubmit(data: z.infer<typeof newVendorSchema>) {
-  //   console.log("DATA: ")
-  //   console.log(data);
-  //   createVendor(data)
-  // }
-  // TODO: add error handling 
-  // action={createVendor}
-  // onSubmit={form.handleSubmit(onSubmit)}
+  // console.log("Form state: ", formState);
+
+  async function onSubmit(data: VendorFormData) {
+    console.log("DATA: ");
+    console.log(data);
+    const {success, message, errors, fields } = await action(data);
+    console.log("Action message: ", message);
+    if (!success) {
+      console.error("Action failed with errors: ", errors);
+      // repopulate the form with the previous values
+      form.reset({
+        ...data,
+        ...fields, // this will repopulate the fields with the values from the server action
+      });
+    } 
+    if (success) {
+      console.log("Vendor created successfully");
+      // reset the form to the default values
+      form.reset();
+      closeForm(); 
+    }
+  }
+
+  // NOTE: the shadcn form component uses react-hook-form under the hood, so we can use its methods directly
+  // NOTE: to use the client side validation provided by the zod schema and react-hook-form, use the `handleSubmit` method from the form instance instead of the action prop
   return (
     <Form {...form}>
-      <form action={createVendor} className="form">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="form">
         <FormField
           control={form.control}
           name="name"
@@ -258,10 +306,12 @@ const NewVendorForm = () => {
             )}
           />
         </div> */}
-        <Button type="submit">Save</Button>
+        <Button type="submit" aria-disabled={pending}>
+          Save
+        </Button>
       </form>
     </Form>
   );
 };
 
-export default NewVendorForm;
+export default VendorForm;
