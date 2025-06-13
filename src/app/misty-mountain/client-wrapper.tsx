@@ -63,7 +63,7 @@ const AdminClientWrapper: React.FC<AdminClientWrapperProps> = ({ vendors }) => {
           onClick={() => setIsCreateOpen(true)}
           className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
         >
-          New Vendor
+          Add a Connection! 
         </button>
       </div>
 
