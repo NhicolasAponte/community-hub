@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
 
-export default function Header() {
+export default function DesktopNavHeader() {
   const pathName = usePathname();
 
   return (
