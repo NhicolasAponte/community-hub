@@ -1,11 +1,10 @@
+import ComingSoonCard from "@/components/cards/coming-soon";
 import React from "react";
 
-const MovingResourcesPage = () => {
-  return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-900 p-4 text-gray-200">
-      <main className="container items-center">moving resources page</main>
-    </div>
-  );
-};
+const MovingResourcesPage = () => (
+  <section className="bg-background text-foreground min-h-[60vh] flex items-center justify-center px-4 py-12">
+    <ComingSoonCard title="Moving Resources" message="Please check back later for resources about Winston-Salem!"/>
+  </section>
+);
 
 export default MovingResourcesPage;

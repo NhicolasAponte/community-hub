@@ -11,9 +11,9 @@ import { Vendor } from "../data-model/schema-types";
 import { eq } from "drizzle-orm";
 
 export async function fetchVendors(): Promise<Vendor[]> {
-  console.log("Fetching vendors...");
+  // console.log("Fetching vendors...");
   const vendors = await db.select().from(vendorTable);
-  console.log("Vendors: ", vendors);
+  // console.log("Vendors: ", vendors);
   return vendors;
 }
 // server action signature
@@ -49,8 +49,8 @@ export async function fetchVendors(): Promise<Vendor[]> {
 export async function createVendor(
   formData: VendorFormData
 ): Promise<FormSubmissionResult> {
-  console.log("Creating vendor...");
-  console.log("FormData: ", formData);
+  // console.log("Creating vendor...");
+  // console.log("FormData: ", formData);
 
   try {
     // IMPLEMENTATION NOTE: authorization and authentication should be handled here
@@ -106,7 +106,7 @@ export async function updateVendor(
       };
       // return { success: false, error: parsedData.error.flatten().fieldErrors };
     }
-    console.log("data validated");
+    // console.log("data validated");
     const validatedData = parsedData.data;
 
     await db
@@ -126,7 +126,7 @@ export async function updateVendor(
 }
 
 export async function deleteVendor(vendorId: string) {
-  console.log("Deleting vendor...");
+  // console.log("Deleting vendor...");
   await db.delete(vendorTable).where(eq(vendorTable.id, vendorId));
 
   revalidatePath(VendorsPage.href);
