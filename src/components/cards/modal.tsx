@@ -19,7 +19,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, children }) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg mx-4 rounded-lg bg-card text-card-foreground shadow-lg p-6 transition-all animate-in fade-in zoom-in"
+        className="relative w-full max-w-lg mx-4 sm:mx-6 md:mx-auto sm:rounded-lg bg-card text-card-foreground shadow-lg p-4 sm:p-6 transition-all animate-in fade-in zoom-in"
       >
         <button
           onClick={onClose}

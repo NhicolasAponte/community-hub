@@ -5,23 +5,24 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react"; // or your icon system of choice
 import { Button } from "../ui/button"; // shadcn button
 import { usePathname } from "next/navigation";
+import { HomePage } from "@/lib/routes";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/misty-mountain", label: "Admin" },
+  // { href: "/", label: "Home" },
+  // { href: "/misty-mountain", label: "Admin" },
   { href: "/vendors", label: "Vendors" },
   { href: "/events", label: "Events" },
   { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/moving", label: "Moving to the Area" },
-  { href: "/login", label: "Login" },
+  // { href: "/login", label: "Login" },
 ];
 
 export default function MobileNavHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(()=>{
+  useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
 
@@ -29,7 +30,9 @@ export default function MobileNavHeader() {
     <header className="w-full px-4 py-3 border-b border-border bg-background text-foreground relative z-50">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* TODO : Change this to be a logo instead of just a title */}
-        <div className="text-lg font-semibold">The Queer Connection</div>
+        <div className="text-lg font-semibold">
+          <Link href={HomePage.href}>The Queer Connection</Link>
+        </div>
 
         {/* Hamburger toggle */}
         <button

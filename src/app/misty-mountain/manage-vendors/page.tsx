@@ -7,8 +7,8 @@
  */
 "use server";
 import React from "react";
-import { fetchVendors } from "@/lib/actions/vendor-actions";
-import VendorClientWrapper from "../../../components/admin/client-wrapper";
+import { fetchVendors } from "@/lib/data/vendor-actions";
+import VendorAdminController from "../../../components/admin/vendor-admin-controller";
 
 const ManageVendorsPage = async () => {
   const vendors = await fetchVendors();
@@ -21,7 +21,7 @@ const ManageVendorsPage = async () => {
           View, edit, or add vendors to your business listing.
         </p>
       </div>
-      <VendorClientWrapper vendors={vendors} />
+      <VendorAdminController vendors={vendors} />
     </section>
   );
 };

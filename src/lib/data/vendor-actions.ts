@@ -4,16 +4,16 @@ import { revalidatePath } from "next/cache";
 import {
   newVendorSchema,
   VendorFormData,
-  VendorFormState,
-} from "../zod-schema/vendor-schema";
-import { VendorsPage } from "../routes";
+  FormSubmissionResult,
+} from "../zod-schema/form-schema";
+import { ManageVendorsPage, VendorsPage } from "../routes";
 import { Vendor } from "../data-model/schema-types";
 import { eq } from "drizzle-orm";
 
 export async function fetchVendors(): Promise<Vendor[]> {
-  console.log("Fetching vendors...");
+  // console.log("Fetching vendors...");
   const vendors = await db.select().from(vendorTable);
-  console.log("Vendors: ", vendors);
+  // console.log("Vendors: ", vendors);
   return vendors;
 }
 // server action signature
@@ -48,9 +48,9 @@ export async function fetchVendors(): Promise<Vendor[]> {
 // }
 export async function createVendor(
   formData: VendorFormData
-): Promise<VendorFormState> {
-  console.log("Creating vendor...");
-  console.log("FormData: ", formData);
+): Promise<FormSubmissionResult> {
+  // console.log("Creating vendor...");
+  // console.log("FormData: ", formData);
 
   try {
     // IMPLEMENTATION NOTE: authorization and authentication should be handled here
@@ -73,6 +73,7 @@ export async function createVendor(
 
     await db.insert(vendorTable).values(validatedData);
 
+    revalidatePath(ManageVendorsPage.href)
     revalidatePath(VendorsPage.href);
     return { success: true, message: "Vendor created successfully" };
   } catch (error) {
@@ -87,7 +88,7 @@ export async function createVendor(
 export async function updateVendor(
   vendorId: string,
   formData: VendorFormData
-): Promise<VendorFormState> {
+): Promise<FormSubmissionResult> {
   console.log("Updating vendor...");
   // const rawData = Object.fromEntries(formData.entries());
   try {
@@ -106,7 +107,7 @@ export async function updateVendor(
       };
       // return { success: false, error: parsedData.error.flatten().fieldErrors };
     }
-    console.log("data validated");
+    // console.log("data validated");
     const validatedData = parsedData.data;
 
     await db
@@ -114,6 +115,7 @@ export async function updateVendor(
       .set(validatedData)
       .where(eq(vendorTable.id, vendorId));
 
+      revalidatePath(ManageVendorsPage.href)
     revalidatePath(VendorsPage.href);
     return { success: true, message: "Vendor updated successfully" };
   } catch (error) {
@@ -126,8 +128,9 @@ export async function updateVendor(
 }
 
 export async function deleteVendor(vendorId: string) {
-  console.log("Deleting vendor...");
+  // console.log("Deleting vendor...");
   await db.delete(vendorTable).where(eq(vendorTable.id, vendorId));
 
+  revalidatePath(ManageVendorsPage.href)
   revalidatePath(VendorsPage.href);
 }
