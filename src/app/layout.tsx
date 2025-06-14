@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
 import localFont from "next/font/local";
 import "./globals.css";
-import Header from "@/components/nav/header";
+import ResponsiveNavHeader from "@/components/nav/responsive-nav-header";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
 });
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
@@ -21,18 +23,27 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans bg-background text-foreground transition-colors`}
       >
-        <div className="bg-page">
-          <Header />
-          {children}
-        </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          themes={["light", "dark"]}
+        >
+          <div className="min-h-screen flex flex-col">
+            <ResponsiveNavHeader />
+            <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              {children}
+            </main>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

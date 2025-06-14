@@ -1,6 +1,6 @@
 import React from "react";
 import { Vendor } from "@/lib/data-model/schema-types";
-import Link from "next/link";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 interface VendorCardProps {
   vendor: Vendor;
@@ -8,80 +8,34 @@ interface VendorCardProps {
 
 const VendorCard = ({ vendor }: VendorCardProps) => {
   return (
-    <div className=" hover:shadow-lg hover:scale-105 transition duration-100">
-      {/* <h2 className="text-green-300 font-semibold text-lg">{vendor.name}</h2> */}
+    <div className="rounded-lg overflow-hidden bg-card text-card-foreground shadow-md hover:shadow-xl hover:scale-[1.02] transition-transform duration-200">
       <CardHeader title={vendor.name} />
       <CardContent>
-        <p className="text-gray-400">🛠 {vendor.description}</p>
-        <div>
-          <ul className="flex flex-row flex-wrap gap-2 mt-2">
-            {vendor.services.map((service, index) => (
-              <li key={index} className="text-gray-400">
-                {index > 0 ? `| ${service}` : service}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <p className="text-muted-foreground mb-2">{vendor.description}</p>
+        {vendor.services && vendor.services.split(",").length > 1 ? (
+          <>
+            <p className="text-muted-foreground">Services:</p>
+            <ul className="list-disc list-inside text-muted-foreground">
+              {vendor.services.split(",").map((service, index) => (
+                <li key={index}>{service.trim()}</li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <p className="text-muted-foreground">Services: {vendor.services}</p>
+        )}
       </CardContent>
       <CardFooter>
         <div className="flex flex-col space-y-2">
-          <p className="text-gray-400">🏠 {vendor.address}</p>
-          <div className="flex space-x-2">
-            <p className="text-gray-400">📧 {vendor.email}</p>
-            <p className="text-gray-400">📞 {vendor.phone}</p>
-          </div>
-          <div className="flex space-x-2">
-            {vendor.website && (
-              <Link
-                href={vendor.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                🌐 Website
-              </Link>
-            )}
-            {vendor.instagram && (
-              <a
-                href={vendor.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                📸 Instagram
-              </a>
-            )}
-            {vendor.twitter && (
-              <a
-                href={vendor.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                🐦 Twitter
-              </a>
-            )}
-            {vendor.linkedin && (
-              <a
-                href={vendor.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                💼 LinkedIn
-              </a>
-            )}
-            {vendor.facebook && (
-              <a
-                href={vendor.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                📘 Facebook
-              </a>
-            )}
-          </div>
+          {vendor.address && (
+            <InfoRow icon={<MapPin className="w-4 h-4 text-accent" />} text={vendor.address} />
+          )}
+          {vendor.email && (
+            <InfoRow icon={<Mail className="w-4 h-4 text-accent" />} text={vendor.email} />
+          )}
+          {vendor.phone && (
+            <InfoRow icon={<Phone className="w-4 h-4 text-accent" />} text={vendor.phone} />
+          )}
         </div>
       </CardFooter>
     </div>
@@ -90,18 +44,27 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
 
 function CardHeader({ title }: { title: string }) {
   return (
-    <div className="rounded-t-md text-xl font-semibold text-green-300 bg-slate-700 p-4">
+    <div className="bg-primary text-primary-foreground p-4 text-xl font-semibold">
       {title}
     </div>
   );
 }
 
 function CardContent({ children }: { children: React.ReactNode }) {
-  return <div className="p-4 bg-slate-800">{children}</div>;
+  return <div className="bg-muted p-4 space-y-2">{children}</div>;
 }
 
 function CardFooter({ children }: { children: React.ReactNode }) {
-  return <div className="bg-slate-800 p-4">{children}</div>;
+  return <div className="bg-muted p-4">{children}</div>;
+}
+
+function InfoRow({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div className="flex items-center space-x-2 text-muted-foreground">
+      {icon}
+      <span>{text}</span>
+    </div>
+  );
 }
 
 export default VendorCard;

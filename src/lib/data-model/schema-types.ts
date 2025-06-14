@@ -1,17 +1,34 @@
+import { vendorTable } from "@/db";
+
 export type Vendor = {
-    id: number;
+    id: string;
     name: string;
     description: string;
-    services: string[];
-    email: string;
-    phone: string;
-    address: string;
-    website: string;
-    instagram: string;
-    twitter: string;
-    linkedin: string;
-    facebook: string;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+    services: string | null; // parse into string array 
+    links: string | null;
+    // use generic links: string[] and programmatically determine type of link 
+    // if the url contains "instagram" then it's an instagram link 
   }
+
+  export type VendorTableType = typeof vendorTable.$inferSelect
+
+//   import { Vendor } from "@/lib/data-model/schema-types";
+// import { VendorFormData } from "@/lib/zod-schema/vendor-schema";
+
+// export function vendorToFormData(vendor: Vendor): VendorFormData {
+//   return {
+//     name: vendor.name,
+//     description: vendor.description,
+//     email: vendor.email || "",
+//     phone: vendor.phone || "",
+//     address: vendor.address || "",
+//     services: vendor.services || "",
+//     links: vendor.links || "",
+//   };
+// }
 
   export type Event = {
     id: number;
