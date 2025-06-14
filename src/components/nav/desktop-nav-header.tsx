@@ -1,5 +1,5 @@
 "use client";
-import { HomePage, NavHeaderRoutes } from "@/lib/routes";
+import { HomePage, NavRoutes } from "@/lib/routes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
@@ -9,7 +9,7 @@ export default function DesktopNavHeader() {
 
   return (
     <header className="w-full px-6 py-4 bg-card text-card-foreground shadow-sm border-b border-border">
-      <div className="flex justify-between items-center max-w-7xl mx-auto">
+      <div className="flex items-center max-w-7xl mx-auto">
         <div className="flex space-x-2">
           <Link
             href={HomePage.href}
@@ -17,16 +17,11 @@ export default function DesktopNavHeader() {
           >
             Home
           </Link>
-          <Link
-            href="/misty-mountain"
-            className="p-2 rounded-md hover:bg-muted hover:text-accent transition"
-          >
-            Admin
-          </Link>
+
         </div>
 
-        <nav className="flex items-center space-x-2">
-          {NavHeaderRoutes.map((route, index) => (
+        <nav className="flex items-center space-x-2l mx-auto">
+          {NavRoutes.map((route, index) => (
             <Button
               key={index}
               asChild
@@ -39,14 +34,7 @@ export default function DesktopNavHeader() {
           ))}
         </nav>
 
-        <div>
-          <Link
-            href="/login"
-            className="text-muted-foreground hover:text-accent transition"
-          >
-            Login
-          </Link>
-        </div>
+
       </div>
     </header>
   );

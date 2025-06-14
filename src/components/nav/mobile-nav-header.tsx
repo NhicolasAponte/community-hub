@@ -8,13 +8,13 @@ import { usePathname } from "next/navigation";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/misty-mountain", label: "Admin" },
+  // { href: "/misty-mountain", label: "Admin" },
   { href: "/vendors", label: "Vendors" },
   { href: "/events", label: "Events" },
   { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/moving", label: "Moving to the Area" },
-  { href: "/login", label: "Login" },
+  // { href: "/login", label: "Login" },
 ];
 
 export default function MobileNavHeader() {
