@@ -1,4 +1,8 @@
-import InstagramCarousel from "@/components/main-page/carousel";
+"use client";
+
+import ResponsiveCarousel from "@/components/main-page/Carousel/responsive-carousel";
+import { useRef } from "react";
+// import { useMediaQuery } from "@/lib/hooks/use-media-query";
 
 const events = [
   {
@@ -22,21 +26,41 @@ const events = [
 ];
 
 export default function Home() {
+  // const isMobile = useMediaQuery("(max-width: 767px)");
+  const eventsRef = useRef<HTMLDivElement>(null);
+
+  // const handleJumpToEvents = () => {
+  //   eventsRef.current?.scrollIntoView({ behavior: "smooth" });
+  // };
   return (
     <div className="flex flex-col items-center min-h-screen bg-background p-4 space-y-12">
       {/* Instagram Carousel */}
-      <InstagramCarousel />
+      <ResponsiveCarousel />
+      {/* TODO : Add back the button (uncomment) and only have it appear when you can't see the upcoming events on mobile*/}
+      {/* TODO : OR! make the words "upcoming events" themselves be a button that when tapped scrolls u down to the events */}
+      {/* {isMobile && (
+        <button
+          onClick={handleJumpToEvents}
+          className="fixed bottom-20 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-full shadow-lg z-50"
+        >
+          Upcoming Events
+        </button>
+      )} */}
 
       {/* Events Section */}
-      <div className="w-full max-w-2xl p-4">
-        <h1 className="text-2xl font-bold text-center mb-6 text-foreground">Upcoming Events</h1>
+      <div ref={eventsRef} className="w-full max-w-2xl p-4">
+        <h1 className="text-2xl font-bold text-center mb-6 text-foreground">
+          Upcoming Events
+        </h1>
         <div className="space-y-4">
           {events.map((event) => (
             <div
               key={event.id}
               className="p-4 bg-card rounded-xl shadow-sm border border-border"
             >
-              <h2 className="text-xl font-semibold text-foreground">{event.name}</h2>
+              <h2 className="text-xl font-semibold text-foreground">
+                {event.name}
+              </h2>
               <p className="text-muted-foreground">📍 {event.place}</p>
               <p className="text-muted-foreground mt-2">{event.description}</p>
             </div>

@@ -3,31 +3,10 @@
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useRef } from "react";
+import { instagramPosts } from "@/lib/instagram-posts-temp";
+import InstagramSlide from "./instagram-slide";
 
-export const instagramPosts = [
-  {
-    url: "https://www.instagram.com/p/DJjpb-XPpRg/",
-    caption: "Check out some regrets!",
-  },
-  {
-    url: "https://www.instagram.com/p/DJhIKq5v1GJ/",
-    caption: "Mother's day is also a thing!",
-  },
-  {
-    url: "https://www.instagram.com/p/DJb7M9huhb0/",
-    caption: "Get some knowledge yo",
-  },
-  {
-    url: "https://www.instagram.com/p/DJW0N_sMqis/",
-    caption: "Now for a Q&A!",
-  },
-  {
-    url: "https://www.instagram.com/p/DJRlJROMCGN/",
-    caption: "Dreaming dreaming",
-  },
-];
-
-export default function InstagramCarousel() {
+export default function DesktopCarousel() {
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     loop: true,
     mode: "free-snap",
@@ -40,6 +19,10 @@ export default function InstagramCarousel() {
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pausedRef = useRef(false);
+
+  const width = 350;
+  const height = 425;
+  const cropTopPx = 0;
 
   useEffect(() => {
     if (!instanceRef.current) return;
@@ -69,8 +52,11 @@ export default function InstagramCarousel() {
 
   return (
     <div className="w-full bg-muted text-foreground py-6 rounded-xl shadow-inner">
-      <h2 className="text-2xl font-bold mb-4 text-center">Check out our Instagram Highlights!</h2>
-      <div className="relative overflow-hidden">
+      <h2 className="text-2xl font-bold mb-4 text-center">
+        Check out our Instagram Highlights!
+      </h2>
+
+      <div className="relative overflow-hidden max-w-7xl mx-auto px-4">
         <div
           ref={sliderRef}
           className="keen-slider w-full overflow-hidden"
@@ -81,31 +67,23 @@ export default function InstagramCarousel() {
             pausedRef.current = false;
           }}
         >
-          {instagramPosts.map((post, index) => {
-            const postId = post.url.split("/")[4];
-            return (
-              <div
-                key={index}
-                className="keen-slider__slide flex justify-center items-center"
-              >
-                <div className="bg-card rounded-lg overflow-hidden shadow-md border border-border">
-                  <iframe
-                    src={`https://www.instagram.com/p/${postId}/embed`}
-                    width="320"
-                    height="400"
-                    frameBorder="0"
-                    scrolling="yes"
-                    className="rounded-lg"
-                  ></iframe>
-                  {post.caption && (
-                    <div className="text-sm text-center text-muted-foreground py-2 bg-background">
-                      {post.caption}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          {instagramPosts.map((post, index) => (
+            <div
+              key={index}
+              className="keen-slider__slide flex-shrink-0 flex justify-center items-center"
+              style={{
+                width: `${width}px`,
+                height: `${height - cropTopPx}px`,
+              }}
+            >
+              <InstagramSlide
+                url={post.url}
+                width={width}
+                height={height}
+                cropTopPx={cropTopPx}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Left Arrow */}

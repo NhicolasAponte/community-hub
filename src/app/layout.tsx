@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Header from "@/components/nav/header";
+import ResponsiveNavHeader from "@/components/nav/responsive-nav-header";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -15,8 +15,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "community hub",
-  description: "view local services and events",
+  title: "The Queer Connection",
+  description: "Connect with your local queer community!",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         <div className="min-h-screen flex flex-col">
-          <Header />
+          <ResponsiveNavHeader />
           <main className="flex-1">{children}</main>
         </div>
       </body>
