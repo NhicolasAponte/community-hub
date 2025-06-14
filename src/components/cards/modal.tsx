@@ -1,43 +1,37 @@
 import React from "react";
 import { X } from "lucide-react";
 
-// interface ModalProps {
-//     open
-// }
-
-function Modal({
-  open,
-  onClose,
-  children,
-}: {
+interface ModalProps {
   open: boolean;
   onClose: () => void;
   children?: React.ReactNode;
-}) {
+}
+
+const Modal: React.FC<ModalProps> = ({ open, onClose, children }) => {
   if (!open) return null;
+
   return (
     <div
       onClick={onClose}
-      className={`fixed inset-0 flex items-center justify-center z-50 transition-colors 
-        ${open ? "visible bg-black bg-opacity-40" : "invisible"} `}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white rounded-lg shadow-lg p-6 transition-all 
-      ${open ? "scale-100 opacity-100" : "scale-125 opacity-0"}`}
+        className="relative w-full max-w-lg mx-4 rounded-lg bg-card text-card-foreground shadow-lg p-6 transition-all animate-in fade-in zoom-in"
       >
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-700
-          bg-white hover:bg-gray-100 rounded-md"
+          className="absolute top-3 right-3 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           aria-label="Close Modal"
         >
-          <X />
+          <X className="w-5 h-5" />
         </button>
         {children}
       </div>
     </div>
   );
-}
+};
 
 export default Modal;

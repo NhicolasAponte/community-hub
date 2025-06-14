@@ -1,23 +1,14 @@
-/**
- * @fileoverview server component for the admin page 
- * @module app/misty-mountain/page
- * @author Nhicolas Aponte
- * @version 0.0.0
- * @date 03-03-2025
- */
-"use server"
-import React from 'react'
-import { fetchVendors } from '@/lib/actions/vendor-actions'
-import AdminClientWrapper from './client-wrapper'
+import React from "react";
 
-const AdminPage = async () => {
-  const vendors = await fetchVendors();
-
+const AdminDashboard = () => {
   return (
-    <div className='page-content'>
-      <AdminClientWrapper vendors={vendors} />
-    </div>
-  )
-}
+    <section className="bg-background text-foreground p-6 rounded-lg shadow-sm">
+      <h1 className="text-2xl font-semibold mb-4">Welcome to Your Dashboard</h1>
+      <p className="text-muted-foreground">
+        Use the sidebar to manage your menus, specials, and business details. If you need help, reach out anytime.
+      </p>
+    </section>
+  );
+};
 
-export default AdminPage
+export default AdminDashboard;

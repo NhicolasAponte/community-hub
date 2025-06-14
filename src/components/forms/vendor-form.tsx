@@ -1,5 +1,5 @@
 /**
- * @fileoverview This file contains the client component NewVendorForm
+ * @fileoverview This file contains the client component VendorForm
  * @module components/forms/vendor-form
  * @author Nhicolas Aponte
  * @version 0.0.0
@@ -26,22 +26,13 @@ import {
   VendorFormState,
 } from "@/lib/zod-schema/vendor-schema";
 import { createVendor } from "@/lib/actions/vendor-actions";
-// import { useActionState } from "react"; // implement when migrating to Nextjs 15
 import { useFormStatus } from "react-dom";
-// import { useFormState } from "react-dom"; // deprecated, use useActionState instead
 
 interface VendorFormProps {
   defaultValues?: VendorFormData;
-  // action: (previousState: VendorFormState, formData: FormData) => Promise<VendorFormState>;
   action?: (data: VendorFormData) => Promise<VendorFormState>;
-  closeForm: () => void; // Optional prop to control visibility of the form 
+  closeForm: () => void;
 }
-
-// not needed when using react-hook-form with zod
-// const initialFormState: VendorFormState = {
-//   success: false,
-//   message: "",
-// }
 
 const VendorForm: React.FC<VendorFormProps> = ({
   defaultValues,
@@ -58,49 +49,36 @@ const VendorForm: React.FC<VendorFormProps> = ({
       address: undefined,
       services: undefined,
       links: undefined,
-      // instagram: undefined,
-      // twitter: undefined,
-      // linkedin: undefined,
-      // facebook: undefined,
     },
     mode: "onBlur",
     reValidateMode: "onChange",
   });
-  // Next.js 15 convention
-  // const [state, formAction, isPending] = useActionState(action, initialFormState)
-  // Next.js 14 convention
-  const { pending } = useFormStatus();
-  // formState is what the server returns after the server action is completed
-  // const [formState, formAction] = useFormState(action, initialFormState);
 
-  // console.log("Form state: ", formState);
+  const { pending } = useFormStatus();
 
   async function onSubmit(data: VendorFormData) {
-    console.log("DATA: ");
-    console.log(data);
-    const {success, message, errors, fields } = await action(data);
-    console.log("Action message: ", message);
+    const { success, errors, fields } = await action(data);
+    // NOTE TODO: implement toast notifications for success and error 
     if (!success) {
       console.error("Action failed with errors: ", errors);
-      // repopulate the form with the previous values
       form.reset({
         ...data,
-        ...fields, // this will repopulate the fields with the values from the server action
+        ...fields,
       });
-    } 
+    }
+
     if (success) {
-      console.log("Vendor created successfully");
-      // reset the form to the default values
       form.reset();
-      closeForm(); 
+      closeForm();
     }
   }
 
-  // NOTE: the shadcn form component uses react-hook-form under the hood, so we can use its methods directly
-  // NOTE: to use the client side validation provided by the zod schema and react-hook-form, use the `handleSubmit` method from the form instance instead of the action prop
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="form">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="form-grid space-y-6"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -108,13 +86,14 @@ const VendorForm: React.FC<VendorFormProps> = ({
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Name" {...field} />
+                <Input placeholder="Business name" {...field} />
               </FormControl>
-              <FormDescription>Enter the name of the vendor.</FormDescription>
+              <FormDescription>The name of the vendor.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="description"
@@ -122,15 +101,14 @@ const VendorForm: React.FC<VendorFormProps> = ({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input placeholder="Description" {...field} />
+                <Input placeholder="A brief description" {...field} />
               </FormControl>
-              <FormDescription>
-                Enter a description of the vendor.
-              </FormDescription>
+              <FormDescription>What they do or offer.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="services"
@@ -138,20 +116,15 @@ const VendorForm: React.FC<VendorFormProps> = ({
             <FormItem>
               <FormLabel>Services</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Services"
-                  {...field}
-                  value={field.value ?? ""}
-                />
+                <Input placeholder="Hair, makeup, rentals, etc." {...field} />
               </FormControl>
-              <FormDescription>
-                Enter the services of the vendor.
-              </FormDescription>
+              <FormDescription>Optional – comma-separated list.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-2 gap-4">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="email"
@@ -159,15 +132,13 @@ const VendorForm: React.FC<VendorFormProps> = ({
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="Email" {...field} />
+                  <Input placeholder="email@example.com" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Enter the email of the vendor.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="phone"
@@ -175,20 +146,14 @@ const VendorForm: React.FC<VendorFormProps> = ({
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Phone"
-                    {...field}
-                    value={field.value ?? undefined}
-                  />
+                  <Input placeholder="(555) 123-4567" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Enter the phone number of the vendor.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
         <FormField
           control={form.control}
           name="address"
@@ -196,15 +161,8 @@ const VendorForm: React.FC<VendorFormProps> = ({
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Address"
-                  {...field}
-                  value={field.value ?? undefined}
-                />
+                <Input placeholder="123 Main St, City, State" {...field} />
               </FormControl>
-              <FormDescription>
-                Enter the address of the vendor.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -217,98 +175,19 @@ const VendorForm: React.FC<VendorFormProps> = ({
             <FormItem>
               <FormLabel>Links</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Links"
-                  {...field}
-                  value={field.value ?? undefined}
-                />
+                <Input placeholder="Website, socials, etc." {...field} />
               </FormControl>
-              <FormDescription>
-                Enter links for the vendor&#39;s website, social media, etc.
-              </FormDescription>
+              <FormDescription>Optional – comma-separated list.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        {/* <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="instagram"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Instagram</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Instagram"
-                    {...field}
-                    value={field.value ?? undefined}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Enter the Instagram of the vendor.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="twitter"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Twitter</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Twitter"
-                    {...field}
-                    value={field.value ?? undefined}
-                  />
-                </FormControl>
-                <FormDescription>Twitter link of the vendor.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="linkedin"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>LinkedIn</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="LinkedIn"
-                    {...field}
-                    value={field.value ?? undefined}
-                  />
-                </FormControl>
-                <FormDescription>LinkedIn of the vendor.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="facebook"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Facebook</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Facebook"
-                    {...field}
-                    value={field.value ?? undefined}
-                  />
-                </FormControl>
-                <FormDescription>Facebook of the vendor.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div> */}
-        <Button type="submit" aria-disabled={pending}>
-          Save
-        </Button>
+
+        <div className="flex justify-end pt-4">
+          <Button type="submit" disabled={pending}>
+            {pending ? "Saving..." : "Save"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
