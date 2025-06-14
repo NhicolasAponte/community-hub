@@ -6,7 +6,7 @@ import {
   VendorFormData,
   FormSubmissionResult,
 } from "../zod-schema/form-schema";
-import { VendorsPage } from "../routes";
+import { ManageVendorsPage, VendorsPage } from "../routes";
 import { Vendor } from "../data-model/schema-types";
 import { eq } from "drizzle-orm";
 
@@ -73,6 +73,7 @@ export async function createVendor(
 
     await db.insert(vendorTable).values(validatedData);
 
+    revalidatePath(ManageVendorsPage.href)
     revalidatePath(VendorsPage.href);
     return { success: true, message: "Vendor created successfully" };
   } catch (error) {
@@ -114,6 +115,7 @@ export async function updateVendor(
       .set(validatedData)
       .where(eq(vendorTable.id, vendorId));
 
+      revalidatePath(ManageVendorsPage.href)
     revalidatePath(VendorsPage.href);
     return { success: true, message: "Vendor updated successfully" };
   } catch (error) {
@@ -129,5 +131,6 @@ export async function deleteVendor(vendorId: string) {
   // console.log("Deleting vendor...");
   await db.delete(vendorTable).where(eq(vendorTable.id, vendorId));
 
+  revalidatePath(ManageVendorsPage.href)
   revalidatePath(VendorsPage.href);
 }

@@ -15,7 +15,7 @@ interface VendorClientWrapperProps {
   vendors: Vendor[];
 }
 
-const VendorClientWrapper: React.FC<VendorClientWrapperProps> = ({
+const VendorAdminController: React.FC<VendorClientWrapperProps> = ({
   vendors,
 }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -86,4 +86,4 @@ const VendorClientWrapper: React.FC<VendorClientWrapperProps> = ({
   );
 };
 
-export default VendorClientWrapper;
+export default VendorAdminController;

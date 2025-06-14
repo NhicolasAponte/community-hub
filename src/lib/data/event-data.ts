@@ -8,16 +8,15 @@ import {
 } from "../zod-schema/form-schema";
 import { eq } from "drizzle-orm";
 import { Event } from "../data-model/schema-types";
-import { EventsPage } from "../routes";
-
+import { EventsPage, ManageEventsPage } from "../routes";
 
 // Adjust this to your events page route
 
-export async function fetchEvents(): Promise<Event[]>{
-    console.log("Fetching events...");
+export async function fetchEvents(): Promise<Event[]> {
+  console.log("Fetching events...");
 
-    const events = await db.select().from(eventTable);
-    return events;
+  const events = await db.select().from(eventTable);
+  return events;
 }
 
 export async function createEvent(
@@ -45,7 +44,9 @@ export async function createEvent(
 
     await db.insert(eventTable).values(validatedData);
 
+    revalidatePath(ManageEventsPage.href);
     revalidatePath(EventsPage.href);
+
     return { success: true, message: "Event created successfully" };
   } catch (error) {
     console.error("Error creating event: ", error);
@@ -83,6 +84,7 @@ export async function updateEvent(
       .set(validatedData)
       .where(eq(eventTable.id, eventId));
 
+    revalidatePath(ManageEventsPage.href);
     revalidatePath(EventsPage.href);
     return { success: true, message: "Event updated successfully" };
   } catch (error) {
@@ -97,6 +99,6 @@ export async function updateEvent(
 export async function deleteEvent(eventId: string) {
   console.log("Deleting event...");
   await db.delete(eventTable).where(eq(eventTable.id, eventId));
-
+  revalidatePath(ManageEventsPage.href);
   revalidatePath(EventsPage.href);
 }
