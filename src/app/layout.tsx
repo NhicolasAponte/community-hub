@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import localFont from "next/font/local";
 import "./globals.css";
-import Header from "@/components/nav/header";
+import ResponsiveNavHeader from "@/components/nav/responsive-nav-header";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -38,7 +38,7 @@ export default function RootLayout({
           themes={["light", "dark"]}
         >
           <div className="min-h-screen flex flex-col">
-            <Header />
+            <ResponsiveNavHeader />
             <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6">
               {children}
             </main>

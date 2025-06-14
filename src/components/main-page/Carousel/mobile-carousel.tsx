@@ -20,8 +20,8 @@ export default function MobileCarousel() {
     null
   );
 
-  const width = 320;
-  const height = 410;
+  const width = 300;
+  const height = 400;
   const cropTopPx = 50;
 
   // Start auto-scroll interval
