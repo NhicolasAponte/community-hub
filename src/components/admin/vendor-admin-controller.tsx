@@ -7,9 +7,9 @@ import {
   createVendor,
   deleteVendor,
   updateVendor,
-} from "@/lib/actions/vendor-actions";
+} from "@/lib/data/vendor-actions";
 import Modal from "@/components/cards/modal";
-import { VendorFormData } from "@/lib/zod-schema/vendor-schema";
+import { VendorFormData } from "@/lib/zod-schema/form-schema";
 
 interface VendorClientWrapperProps {
   vendors: Vendor[];

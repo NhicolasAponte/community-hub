@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import {
   newVendorSchema,
   VendorFormData,
-  VendorFormState,
-} from "../zod-schema/vendor-schema";
+  FormSubmissionResult,
+} from "../zod-schema/form-schema";
 import { VendorsPage } from "../routes";
 import { Vendor } from "../data-model/schema-types";
 import { eq } from "drizzle-orm";
@@ -48,7 +48,7 @@ export async function fetchVendors(): Promise<Vendor[]> {
 // }
 export async function createVendor(
   formData: VendorFormData
-): Promise<VendorFormState> {
+): Promise<FormSubmissionResult> {
   console.log("Creating vendor...");
   console.log("FormData: ", formData);
 
@@ -87,7 +87,7 @@ export async function createVendor(
 export async function updateVendor(
   vendorId: string,
   formData: VendorFormData
-): Promise<VendorFormState> {
+): Promise<FormSubmissionResult> {
   console.log("Updating vendor...");
   // const rawData = Object.fromEntries(formData.entries());
   try {

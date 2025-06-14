@@ -1,10 +1,3 @@
-/**
- * @fileoverview This file contains the client component VendorForm
- * @module components/forms/vendor-form
- * @author Nhicolas Aponte
- * @version 0.0.0
- * @date 03-03-2025
- */
 "use client";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,34 +14,30 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
 import {
-  newVendorSchema,
-  VendorFormData,
+  eventFormSchema,
+  EventFormData,
   FormSubmissionResult,
 } from "@/lib/zod-schema/form-schema";
-import { createVendor } from "@/lib/data/vendor-actions";
 import { useFormStatus } from "react-dom";
 
-interface VendorFormProps {
-  defaultValues?: VendorFormData;
-  action?: (data: VendorFormData) => Promise<FormSubmissionResult>;
+interface EventFormProps {
+  defaultValues?: EventFormData;
+  action?: (data: EventFormData) => Promise<FormSubmissionResult>;
   closeForm: () => void;
 }
 
-const VendorForm: React.FC<VendorFormProps> = ({
+const EventForm: React.FC<EventFormProps> = ({
   defaultValues,
-  action = createVendor,
+  action,
   closeForm,
 }) => {
-  const form = useForm<VendorFormData>({
-    resolver: zodResolver(newVendorSchema),
+  const form = useForm<EventFormData>({
+    resolver: zodResolver(eventFormSchema),
     defaultValues: defaultValues || {
       name: "",
       description: "",
-      email: "",
-      phone: undefined,
-      address: undefined,
-      services: undefined,
-      links: undefined,
+      date: "",
+      location: "",
     },
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -56,7 +45,8 @@ const VendorForm: React.FC<VendorFormProps> = ({
 
   const { pending } = useFormStatus();
 
-  async function onSubmit(data: VendorFormData) {
+  async function onSubmit(data: EventFormData) {
+    if (!action) return;
     const { success, errors, fields } = await action(data);
     // NOTE TODO: implement toast notifications for success and error
     if (!success) {
@@ -86,9 +76,9 @@ const VendorForm: React.FC<VendorFormProps> = ({
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Business name" {...field} />
+                <Input placeholder="Event name" {...field} />
               </FormControl>
-              <FormDescription>The name of the vendor.</FormDescription>
+              <FormDescription>The name of the event.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -103,24 +93,7 @@ const VendorForm: React.FC<VendorFormProps> = ({
               <FormControl>
                 <Input placeholder="A brief description" {...field} />
               </FormControl>
-              <FormDescription>What they do or offer.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="services"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Services</FormLabel>
-              <FormControl>
-                <Input placeholder="Hair, makeup, rentals, etc." {...field} />
-              </FormControl>
-              <FormDescription>
-                Optional – comma-separated list.
-              </FormDescription>
+              <FormDescription>What is this event about?</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -129,12 +102,12 @@ const VendorForm: React.FC<VendorFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="email"
+            name="date"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Date</FormLabel>
                 <FormControl>
-                  <Input placeholder="email@example.com" {...field} />
+                  <Input type="date" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -143,49 +116,18 @@ const VendorForm: React.FC<VendorFormProps> = ({
 
           <FormField
             control={form.control}
-            name="phone"
+            name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone</FormLabel>
+                <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input placeholder="(555) 123-4567" {...field} />
+                  <Input placeholder="Event location" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Address</FormLabel>
-              <FormControl>
-                <Input placeholder="123 Main St, City, State" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="links"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Links</FormLabel>
-              <FormControl>
-                <Input placeholder="Website, socials, etc." {...field} />
-              </FormControl>
-              <FormDescription>
-                Optional – comma-separated list.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={pending}>
@@ -197,4 +139,4 @@ const VendorForm: React.FC<VendorFormProps> = ({
   );
 };
 
-export default VendorForm;
+export default EventForm;

@@ -17,3 +17,14 @@ export const vendorTable = pgTable(
     // linkedin: varchar("linkedin", { length: 255 }),
     // facebook: varchar("facebook", { length: 255 }),
 })
+
+export const eventTable = pgTable(
+    "event", 
+    {
+    id: uuid("id").primaryKey().defaultRandom().notNull(),
+    name: varchar("name").notNull(),
+    description: varchar("description", { length: 255 }).notNull(),
+    date: varchar("date", { length: 255 }).notNull(),
+    location: varchar("location", { length: 255 }).notNull(),
+    }
+)

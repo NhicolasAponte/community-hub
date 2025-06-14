@@ -1,7 +1,7 @@
-"use server"
-import { fetchVendors } from '@/lib/actions/vendor-actions'
-import React from 'react'
-import VendorList from './vendor-list';
+"use server";
+import { fetchVendors } from "@/lib/data/vendor-actions";
+import React from "react";
+import VendorList from "./vendor-list";
 
 const VendorsPage = async () => {
   const vendors = await fetchVendors();
@@ -9,7 +9,7 @@ const VendorsPage = async () => {
     <div>
       <VendorList vendors={vendors} />
     </div>
-  )
-}
+  );
+};
 
-export default VendorsPage
+export default VendorsPage;
