@@ -5,18 +5,18 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react"; // or your icon system of choice
 import { Button } from "../ui/button"; // shadcn button
 import { usePathname } from "next/navigation";
-import { HomePage } from "@/lib/routes";
+import { HomePage, NavRoutes } from "@/lib/routes";
 
-const navLinks = [
-  // { href: "/", label: "Home" },
-  // { href: "/misty-mountain", label: "Admin" },
-  { href: "/vendors", label: "Vendors" },
-  { href: "/events", label: "Events" },
-  { href: "/blog", label: "Blog" },
-  { href: "/about", label: "About" },
-  { href: "/moving", label: "Moving to the Area" },
-  // { href: "/login", label: "Login" },
-];
+// const navLinks = [
+//   // { href: "/", label: "Home" },
+//   // { href: "/misty-mountain", label: "Admin" },
+//   { href: "/vendors", label: "Vendors" },
+//   { href: "/events", label: "Events" },
+//   { href: "/blog", label: "Blog" },
+//   { href: "/about", label: "About" },
+//   { href: "/moving", label: "Moving to the Area" },
+//   // { href: "/login", label: "Login" },
+// ];
 
 export default function MobileNavHeader() {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +48,7 @@ export default function MobileNavHeader() {
       {isOpen && (
         <div className="absolute top-full left-0 w-full bg-card border-t border-border shadow-md">
           <nav className="flex flex-col space-y-1 px-4 py-4">
-            {navLinks.map((link) => (
+            {NavRoutes.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
