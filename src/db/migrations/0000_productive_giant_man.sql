@@ -6,6 +6,13 @@ CREATE TABLE "event" (
 	"location" varchar(255) NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "newsletter" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"title" varchar NOT NULL,
+	"content" varchar(255) NOT NULL,
+	"date" varchar(255) NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "vendor" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar NOT NULL,

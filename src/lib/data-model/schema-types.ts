@@ -1,4 +1,4 @@
-import { eventTable, vendorTable } from "@/db";
+import { eventTable, newsletterTable, vendorTable } from "@/db";
 
 // export type Vendor = {
 //     id: string;
@@ -32,12 +32,7 @@ import { eventTable, vendorTable } from "@/db";
 
   export type Event = typeof eventTable.$inferSelect
 
-  export type BlogPost = {
-    id: number;
-    title: string;
-    content: string;
-    date: string;
-  }
+  export type Newsletter = typeof newsletterTable.$inferSelect 
 
   export type User = {
     id: number;

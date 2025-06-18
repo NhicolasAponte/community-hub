@@ -26,5 +26,17 @@ export const eventTable = pgTable(
     description: varchar("description", { length: 255 }).notNull(),
     date: varchar("date", { length: 255 }).notNull(),
     location: varchar("location", { length: 255 }).notNull(),
+    // badges: varchar("tags", { length: 255 }),
+        // badges let you add a badge like "pride", "holiday", "alcohol-free", etc.
+    }
+)
+
+export const newsletterTable = pgTable(
+    "newsletter",
+    {
+        id: uuid("id").primaryKey().defaultRandom().notNull(),
+        title: varchar("title").notNull(),
+        content: varchar("content", { length: 255 }).notNull(),
+        date: varchar("date", { length: 255 }).notNull(),
     }
 )

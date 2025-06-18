@@ -8,9 +8,9 @@ export const AboutPage = {
   href: "/about",
 };
 
-export const BlogPage = {
-  label: "Blog",
-  href: "/blog",
+export const NewsletterPage = {
+  label: "Newsletter",
+  href: "/newsletter",
 };
 
 export const EventsPage = {
@@ -31,7 +31,7 @@ export const MovingResourcesPage = {
 export const NavRoutes = [
   VendorsPage,
   EventsPage,
-  BlogPage,
+  NewsletterPage,
   AboutPage,
   MovingResourcesPage,
 ];
