@@ -1,13 +1,24 @@
 "use client";
 import NewsletterCard from "@/components/newsletter/newsletter-card";
 import { Newsletter } from "@/lib/data-model/schema-types";
-import React from "react";
+import React, { useState } from "react";
 
 interface NewsletterControllerProps {
   newsletters: Newsletter[];
 }
 
 const NewsletterController = ({ newsletters }: NewsletterControllerProps) => {
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (id: string) => {
+    const newExpanded = new Set(expandedCards);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedCards(newExpanded);
+  };
   // Mock data for development - remove when actual data is passed from server
   const mockNewsletters: Newsletter[] = newsletters?.length
     ? newsletters
@@ -53,7 +64,12 @@ const NewsletterController = ({ newsletters }: NewsletterControllerProps) => {
         {mockNewsletters.length > 0 ? (
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
             {mockNewsletters.map((newsletter) => (
-              <NewsletterCard key={newsletter.id} newsletter={newsletter} />
+              <NewsletterCard
+                key={newsletter.id}
+                newsletter={newsletter}
+                isExpanded={expandedCards.has(newsletter.id)}
+                onToggleExpand={() => toggleExpanded(newsletter.id)}
+              />
             ))}
           </div>
         ) : (
