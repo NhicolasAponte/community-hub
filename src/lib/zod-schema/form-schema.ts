@@ -34,6 +34,16 @@ export const eventFormSchema = z.object({
   description: z.string(),
   date: z.string().min(1, { message: "Enter the date of the Event" }),
   location: z.string().min(1, { message: "Enter the location of the Event" }),
-})
+});
 
 export type EventFormData = z.infer<typeof eventFormSchema>;
+
+export const newsletterFormSchema = z.object({
+  title: z.string().min(1, { message: "Enter the title of the Newsletter" }),
+  content: z
+    .string()
+    .min(1, { message: "Enter the content of the Newsletter" }),
+  date: z.string().min(1, { message: "Enter the date of the Newsletter" }),
+});
+
+export type NewsletterFormData = z.infer<typeof newsletterFormSchema>;

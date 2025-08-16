@@ -38,17 +38,22 @@ export const NavRoutes = [
 
 export const AdminDashboardPage = {
   label: "Dashboard",
-  href: "/misty-mountain",
+  href: "/admin",
 };
 
 export const ManageVendorsPage = {
   label: "Manage Vendors",
-  href: "/misty-mountain/manage-vendors",
+  href: "/admin/manage-vendors",
 };
 
 export const ManageEventsPage = {
   label: "Manage Events",
-  href: "/misty-mountain/manage-events",
+  href: "/admin/manage-events",
 };
 
-export const AdminSidebarRoutes = [ManageVendorsPage, ManageEventsPage];
+export const ManageNewslettersPage = {
+  label: "Manage Newsletters",
+  href: "/admin/manage-newsletters",
+}
+
+export const AdminSidebarRoutes = [ManageVendorsPage, ManageEventsPage, ManageNewslettersPage];

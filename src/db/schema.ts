@@ -35,8 +35,8 @@ export const newsletterTable = pgTable(
     "newsletter",
     {
         id: uuid("id").primaryKey().defaultRandom().notNull(),
-        title: varchar("title").notNull(),
-        content: varchar("content", { length: 255 }).notNull(),
+        title: varchar("title", { length: 255 }).notNull(),
+        content: varchar("content").notNull(),
         date: varchar("date", { length: 255 }).notNull(),
     }
 )
