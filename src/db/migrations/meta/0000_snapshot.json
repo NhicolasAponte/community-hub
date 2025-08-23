@@ -1,12 +1,104 @@
 {
-  "id": "4edc0469-9b80-4f15-bbf9-7aa82c6f584b",
+  "id": "a4590c99-e57f-4e02-b9c8-a4c34bddb148",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.event": {
+    "dev-schema.email_queue": {
+      "name": "email_queue",
+      "schema": "dev-schema",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "newsletter_id": {
+          "name": "newsletter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recipient_email": {
+          "name": "recipient_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recipient_name": {
+          "name": "recipient_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "scheduled_for": {
+          "name": "scheduled_for",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "batch_number": {
+          "name": "batch_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "email_queue_newsletter_id_newsletter_id_fk": {
+          "name": "email_queue_newsletter_id_newsletter_id_fk",
+          "tableFrom": "email_queue",
+          "tableTo": "newsletter",
+          "schemaTo": "dev-schema",
+          "columnsFrom": [
+            "newsletter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "dev-schema.event": {
       "name": "event",
-      "schema": "",
+      "schema": "dev-schema",
       "columns": {
         "id": {
           "name": "id",
@@ -48,9 +140,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.newsletter": {
+    "dev-schema.newsletter": {
       "name": "newsletter",
-      "schema": "",
+      "schema": "dev-schema",
       "columns": {
         "id": {
           "name": "id",
@@ -86,9 +178,69 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.vendor": {
+    "dev-schema.subscriber": {
+      "name": "subscriber",
+      "schema": "dev-schema",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subscribed": {
+          "name": "subscribed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "subscribed_at": {
+          "name": "subscribed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "unsubscribe_token": {
+          "name": "unsubscribe_token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "subscriber_email_unique": {
+          "name": "subscriber_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "dev-schema.vendor": {
       "name": "vendor",
-      "schema": "",
+      "schema": "dev-schema",
       "columns": {
         "id": {
           "name": "id",
@@ -150,7 +302,9 @@
     }
   },
   "enums": {},
-  "schemas": {},
+  "schemas": {
+    "dev-schema": "dev-schema"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},
