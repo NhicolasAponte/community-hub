@@ -9,6 +9,7 @@ import {
 import { eq } from "drizzle-orm";
 import { Newsletter } from "../data-model/schema-types";
 import { NewsletterPage, ManageNewslettersPage } from "../routes";
+import { queueNewsletterEmails } from "../email-service";
 
 export async function fetchNewsletters(): Promise<Newsletter[]> {
   console.log("Fetching newsletters...");
@@ -41,11 +42,38 @@ export async function createNewsletter(
     }
     const validatedData = parsedData.data;
 
-    await db.insert(newsletterTable).values(validatedData);
+    // Insert the newsletter and get the created record
+    const [createdNewsletter] = await db
+      .insert(newsletterTable)
+      .values(validatedData)
+      .returning();
+
+    // Queue emails for all subscribers
+    const emailResult = await queueNewsletterEmails({
+      newsletterId: createdNewsletter.id,
+      title: createdNewsletter.title,
+      content: createdNewsletter.content,
+    });
+
+    if (!emailResult.success) {
+      console.warn(
+        "Newsletter created but email queuing failed:",
+        emailResult.message
+      );
+      // Don't fail the newsletter creation if email queuing fails
+    } else {
+      console.log("Newsletter created and emails queued:", emailResult.message);
+    }
 
     revalidatePath(ManageNewslettersPage.href);
     revalidatePath(NewsletterPage.href);
-    return { success: true, message: "Newsletter created successfully" };
+
+    return {
+      success: true,
+      message: emailResult.success
+        ? `Newsletter created successfully. ${emailResult.message}`
+        : "Newsletter created successfully, but email queuing failed. Emails can be queued manually later.",
+    };
   } catch (error) {
     console.error("Error creating newsletter: ", error);
     return {
