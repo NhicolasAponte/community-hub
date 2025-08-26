@@ -1,6 +1,7 @@
 "use client";
 
 import ResponsiveCarousel from "@/components/main-page/Carousel/responsive-carousel";
+import NewsletterSubscriptionForm from "@/components/newsletter/newsletter-subscription";
 import { useRef } from "react";
 // import { useMediaQuery } from "@/lib/hooks/use-media-query";
 
@@ -34,6 +35,9 @@ export default function Home() {
   // };
   return (
     <div className="flex flex-col items-center min-h-screen bg-background p-4 space-y-12">
+      <section>
+        <NewsletterSubscriptionForm />
+      </section>
       {/* Instagram Carousel */}
       <ResponsiveCarousel />
       {/* TODO : Add back the button (uncomment) and only have it appear when you can't see the upcoming events on mobile*/}

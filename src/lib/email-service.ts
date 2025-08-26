@@ -26,13 +26,167 @@ interface EmailData {
 
 // Constants
 const EMAILS_PER_DAY = 99; // Leave 1 email buffer for other system emails
-const FROM_EMAIL = "Community Hub <newsletter@yourdomain.com>"; // Update with your domain
+const FROM_EMAIL = "Community Hub <onboarding@resend.dev>"; // Resend's verified testing domain
+
+/**
+ * Send emails immediately for small subscriber lists or handle failures for larger lists
+ */
+export async function sendImmediateEmails({
+  newsletterId,
+  title,
+  content,
+}: QueueEmailOptions) {
+  try {
+    // Get all active subscribers
+    const subscribers = await db
+      .select()
+      .from(subscriberTable)
+      .where(eq(subscriberTable.subscribed, true));
+
+    if (subscribers.length === 0) {
+      console.log("No active subscribers found");
+      return {
+        success: true,
+        message: "No subscribers to send to",
+        stats: { immediate: 0, queued: 0 },
+      };
+    }
+
+    console.log(`Found ${subscribers.length} subscribers`);
+
+    // If 99 or fewer subscribers, send immediately
+    if (subscribers.length <= EMAILS_PER_DAY) {
+      console.log(`Sending ${subscribers.length} emails immediately`);
+
+      let successCount = 0;
+      let failureCount = 0;
+      const failedEmails: Array<{
+        email: string;
+        name: string | null;
+        error: string;
+      }> = [];
+
+      // Send emails immediately
+      for (const subscriber of subscribers) {
+        try {
+          await sendSingleEmailDirect({
+            recipientEmail: subscriber.email,
+            recipientName: subscriber.name,
+            title,
+            content,
+          });
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to send email to ${subscriber.email}:`, error);
+          failedEmails.push({
+            email: subscriber.email,
+            name: subscriber.name,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+          failureCount++;
+        }
+      }
+
+      // Queue any failed emails for retry
+      if (failedEmails.length > 0) {
+        console.log(`Queueing ${failedEmails.length} failed emails for retry`);
+
+        const queueEntries = failedEmails.map((failed) => ({
+          newsletterId,
+          recipientEmail: failed.email,
+          recipientName: failed.name,
+          status: "pending" as const,
+          scheduledFor: new Date(Date.now() + 5 * 60 * 1000), // Retry in 5 minutes
+          sentAt: null,
+          attempts: 1, // This is a retry
+          errorMessage: failed.error.substring(0, 500),
+          batchNumber: 0,
+        }));
+
+        await db.insert(emailQueueTable).values(queueEntries);
+      }
+
+      return {
+        success: true,
+        message: `Sent ${successCount} emails immediately${failureCount > 0 ? `, queued ${failureCount} failed emails for retry` : ""}`,
+        stats: {
+          immediate: successCount,
+          queued: failureCount,
+          total: subscribers.length,
+        },
+      };
+    } else {
+      // For larger lists, use the queue system
+      console.log(
+        `Large subscriber list (${subscribers.length}), using queue system`
+      );
+      return await queueNewsletterEmails({ newsletterId, title, content });
+    }
+  } catch (error) {
+    console.error("Error in sendImmediateEmails:", error);
+    return {
+      success: false,
+      message: "Failed to process newsletter emails",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Send a single email directly without queue tracking (for immediate sending)
+ */
+async function sendSingleEmailDirect({
+  recipientEmail,
+  recipientName,
+  title,
+  content,
+}: {
+  recipientEmail: string;
+  recipientName: string | null;
+  title: string;
+  content: string;
+}) {
+  // Generate unsubscribe URL
+  const subscriber = await db
+    .select({ unsubscribeToken: subscriberTable.unsubscribeToken })
+    .from(subscriberTable)
+    .where(eq(subscriberTable.email, recipientEmail))
+    .limit(1);
+
+  const unsubscribeUrl = subscriber[0]
+    ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${subscriber[0].unsubscribeToken}`
+    : `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${encodeURIComponent(recipientEmail)}`;
+
+  // Render the email template
+  const emailHtml = await render(
+    NewsletterEmail({
+      title,
+      content,
+      recipientName: recipientName || undefined,
+      unsubscribeUrl,
+    })
+  );
+
+  // Send the email via Resend
+  const { data, error } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: [recipientEmail],
+    subject: title,
+    html: emailHtml,
+  });
+
+  if (error) {
+    throw new Error(`Resend error: ${error.message}`);
+  }
+
+  console.log(`Successfully sent email to ${recipientEmail} (ID: ${data?.id})`);
+}
 
 /**
  * Queue emails for all active subscribers when a newsletter is created
  */
 export async function queueNewsletterEmails({
-  newsletterId
+  newsletterId,
 }: QueueEmailOptions) {
   try {
     // Get all active subscribers

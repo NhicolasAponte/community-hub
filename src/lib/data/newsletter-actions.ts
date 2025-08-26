@@ -9,7 +9,7 @@ import {
 import { eq } from "drizzle-orm";
 import { Newsletter } from "../data-model/schema-types";
 import { NewsletterPage, ManageNewslettersPage } from "../routes";
-import { queueNewsletterEmails } from "../email-service";
+import { sendImmediateEmails } from "../email-service";
 
 export async function fetchNewsletters(): Promise<Newsletter[]> {
   console.log("Fetching newsletters...");
@@ -48,8 +48,8 @@ export async function createNewsletter(
       .values(validatedData)
       .returning();
 
-    // Queue emails for all subscribers
-    const emailResult = await queueNewsletterEmails({
+    // Send emails immediately for small lists, or queue for large lists
+    const emailResult = await sendImmediateEmails({
       newsletterId: createdNewsletter.id,
       title: createdNewsletter.title,
       content: createdNewsletter.content,
@@ -57,12 +57,15 @@ export async function createNewsletter(
 
     if (!emailResult.success) {
       console.warn(
-        "Newsletter created but email queuing failed:",
+        "Newsletter created but email processing failed:",
         emailResult.message
       );
-      // Don't fail the newsletter creation if email queuing fails
+      // Don't fail the newsletter creation if email processing fails
     } else {
-      console.log("Newsletter created and emails queued:", emailResult.message);
+      console.log(
+        "Newsletter created and emails processed:",
+        emailResult.message
+      );
     }
 
     revalidatePath(ManageNewslettersPage.href);
@@ -72,7 +75,7 @@ export async function createNewsletter(
       success: true,
       message: emailResult.success
         ? `Newsletter created successfully. ${emailResult.message}`
-        : "Newsletter created successfully, but email queuing failed. Emails can be queued manually later.",
+        : "Newsletter created successfully, but email processing failed. Emails can be processed manually later.",
     };
   } catch (error) {
     console.error("Error creating newsletter: ", error);
