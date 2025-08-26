@@ -96,7 +96,7 @@ const NewsletterController = ({ newsletters }: NewsletterControllerProps) => {
             Subscribe to receive the latest community updates directly in your
             inbox
           </p>
-          <div className="max-w-md mx-auto flex gap-2">
+          <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-2">
             <input
               type="email"
               placeholder="Enter your email"
