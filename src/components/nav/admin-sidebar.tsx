@@ -18,11 +18,10 @@ const links = AdminSidebarRoutes;
 
 interface AdminSidebarProps {
   className?: string;
-  isOpen?: boolean;
   onClose?: () => void;
 }
 
-export default function AdminSidebar({ className, isOpen, onClose }: AdminSidebarProps) {
+export default function AdminSidebar({ className, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (

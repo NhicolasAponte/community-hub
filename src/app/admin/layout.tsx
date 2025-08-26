@@ -16,20 +16,19 @@ export default function AdminLayout({
     <div className="min-h-screen bg-background text-foreground flex">
       {/* Mobile backdrop overlay */}
       {showSidebar && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
           onClick={() => setShowSidebar(false)}
         />
       )}
 
       {/* Sidebar */}
-      <AdminSidebar 
+      <AdminSidebar
         className={`
           fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out
           lg:relative lg:translate-x-0 lg:z-auto
           ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
-        isOpen={showSidebar}
         onClose={() => setShowSidebar(false)}
       />
 
@@ -37,9 +36,9 @@ export default function AdminLayout({
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Header with sidebar toggle */}
         <header className="flex items-center p-4 border-b border-border lg:hidden">
-          <SidebarToggle 
+          <SidebarToggle
             isOpen={showSidebar}
-            onToggle={() => setShowSidebar((prev) => !prev)} 
+            onToggle={() => setShowSidebar((prev) => !prev)}
           />
           <h1 className="ml-4 text-lg font-semibold text-foreground">Admin Panel</h1>
         </header>

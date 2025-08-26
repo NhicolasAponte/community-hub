@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Event } from '@/lib/data-model/schema-types';
 import { ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
 import Modal from '@/components/cards/modal';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 interface EventCalendarProps {
