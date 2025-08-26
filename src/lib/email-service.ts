@@ -32,9 +32,7 @@ const FROM_EMAIL = "Community Hub <newsletter@yourdomain.com>"; // Update with y
  * Queue emails for all active subscribers when a newsletter is created
  */
 export async function queueNewsletterEmails({
-  newsletterId,
-  title,
-  content,
+  newsletterId
 }: QueueEmailOptions) {
   try {
     // Get all active subscribers

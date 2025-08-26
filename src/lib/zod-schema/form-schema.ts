@@ -47,3 +47,10 @@ export const newsletterFormSchema = z.object({
 });
 
 export type NewsletterFormData = z.infer<typeof newsletterFormSchema>;
+
+export const subscriptionFormSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+});
+
+export type SubscriptionFormData = z.infer<typeof subscriptionFormSchema>;
