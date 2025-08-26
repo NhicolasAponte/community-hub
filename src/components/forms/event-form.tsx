@@ -67,7 +67,7 @@ const EventForm: React.FC<EventFormProps> = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full max-2-2xl mx-auto space-y-6 sm:p-6"
+        className="w-full space-y-4 sm:space-y-6"
       >
         <FormField
           control={form.control}

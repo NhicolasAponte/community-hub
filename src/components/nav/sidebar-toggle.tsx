@@ -1,27 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button"; // assuming you have one or want to make one
 import { Menu, X } from "lucide-react";
 
-export default function SidebarToggle({
-  onToggle,
-}: {
+interface SidebarToggleProps {
   onToggle: () => void;
-}) {
-  const [open, setOpen] = useState(true);
+  isOpen?: boolean;
+}
 
+export default function SidebarToggle({ onToggle, isOpen = false }: SidebarToggleProps) {
   return (
     <Button
       variant="ghost"
-      onClick={() => {
-        setOpen(!open);
-        onToggle();
-      }}
+      onClick={onToggle}
       className="lg:hidden"
       aria-label="Toggle sidebar"
     >
-      {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
     </Button>
   );
 }

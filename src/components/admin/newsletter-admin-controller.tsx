@@ -40,19 +40,20 @@ const NewsletterAdminController: React.FC<NewsletterAdminControllerProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6 w-full max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <h2 className="text-lg sm:text-xl font-medium text-foreground">Newsletter Management</h2>
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+          className="bg-primary text-primary-foreground px-4 py-2 text-sm sm:text-base rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto"
         >
           Create Newsletter
         </button>
       </div>
 
       <Modal open={isCreateOpen} onClose={() => setIsCreateOpen(false)}>
-        <div className="p-4 bg-card rounded-lg">
-          <h3 className="text-lg font-semibold mb-4 text-card-foreground">
+        <div className="bg-card rounded-lg w-full">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-card-foreground pr-8">
             Create Newsletter
           </h3>
           <NewsletterForm
@@ -63,8 +64,8 @@ const NewsletterAdminController: React.FC<NewsletterAdminControllerProps> = ({
       </Modal>
 
       <Modal open={isEditOpen} onClose={() => setIsEditOpen(false)}>
-        <div className="p-4 bg-card rounded-lg">
-          <h3 className="text-lg font-semibold mb-4 text-card-foreground">
+        <div className="bg-card rounded-lg w-full">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-card-foreground pr-8">
             Edit Newsletter
           </h3>
           <NewsletterForm
