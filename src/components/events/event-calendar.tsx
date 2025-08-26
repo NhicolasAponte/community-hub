@@ -200,31 +200,51 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ events }) => {
 
               {/* Events */}
               <div className="space-y-1">
-                {dayEvents.slice(0, 2).map((event) => (
+                {dayEvents.length === 1 ? (
+                  // Single event - show more details
                   <div
-                    key={event.id}
+                    key={dayEvents[0].id}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedEvent(event);
+                      setSelectedEvent(dayEvents[0]);
                     }}
-                    className="bg-purple-200 dark:bg-purple-800/60 text-purple-800 dark:text-purple-200 text-xs px-1 py-0.5 rounded truncate hover:bg-purple-300 dark:hover:bg-purple-700/80 transition-colors cursor-pointer"
-                    title={event.name}
+                    className="bg-purple-200 dark:bg-purple-800/60 text-purple-800 dark:text-purple-200 text-xs p-1 rounded hover:bg-purple-300 dark:hover:bg-purple-700/80 transition-colors cursor-pointer overflow-hidden"
+                    title={`${dayEvents[0].name} - ${dayEvents[0].location} - ${dayEvents[0].description}`}
                   >
-                    {event.name}
+                    <div className="font-medium truncate">{dayEvents[0].name}</div>
+                    <div className="text-xs opacity-80 truncate">{dayEvents[0].location}</div>
+                    <div className="text-xs opacity-70 line-clamp-2 leading-tight">{dayEvents[0].description}</div>
                   </div>
-                ))}
-                
-                {/* Show "more" indicator if there are additional events */}
-                {dayEvents.length > 2 && (
-                  <div 
-                    className="text-xs text-muted-foreground px-1 hover:text-foreground cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDayEvents(dayEvents);
-                    }}
-                  >
-                    +{dayEvents.length - 2} more
-                  </div>
+                ) : (
+                  // Multiple events - show compact view
+                  <>
+                    {dayEvents.slice(0, 2).map((event) => (
+                      <div
+                        key={event.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedEvent(event);
+                        }}
+                        className="bg-purple-200 dark:bg-purple-800/60 text-purple-800 dark:text-purple-200 text-xs px-1 py-0.5 rounded truncate hover:bg-purple-300 dark:hover:bg-purple-700/80 transition-colors cursor-pointer"
+                        title={event.name}
+                      >
+                        {event.name}
+                      </div>
+                    ))}
+                    
+                    {/* Show "more" indicator if there are additional events */}
+                    {dayEvents.length > 2 && (
+                      <div 
+                        className="text-xs text-muted-foreground px-1 hover:text-foreground cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDayEvents(dayEvents);
+                        }}
+                      >
+                        +{dayEvents.length - 2} more
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
