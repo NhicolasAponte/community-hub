@@ -5,9 +5,10 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   children?: React.ReactNode;
+  fullScreenOnDesktop?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ open, onClose, children }) => {
+const Modal: React.FC<ModalProps> = ({ open, onClose, children, fullScreenOnDesktop = false }) => {
   if (!open) return null;
 
   return (
@@ -19,7 +20,11 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, children }) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg sm:mx-auto sm:rounded-lg bg-card text-card-foreground shadow-lg p-4 sm:p-6 transition-all animate-in fade-in zoom-in my-4 sm:my-0 max-h-[calc(100vh-2rem)] overflow-y-auto"
+        className={`relative w-full bg-card text-card-foreground shadow-lg p-4 sm:p-6 transition-all animate-in fade-in zoom-in my-4 sm:my-0 max-h-[calc(100vh-2rem)] overflow-y-auto ${
+          fullScreenOnDesktop 
+            ? 'sm:max-w-none sm:w-[95vw] sm:h-[90vh] sm:max-h-[90vh] sm:my-[5vh] sm:rounded-lg' 
+            : 'max-w-lg sm:mx-auto sm:rounded-lg'
+        }`}
       >
         <button
           onClick={onClose}

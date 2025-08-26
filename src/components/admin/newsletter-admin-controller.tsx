@@ -51,28 +51,32 @@ const NewsletterAdminController: React.FC<NewsletterAdminControllerProps> = ({
         </button>
       </div>
 
-      <Modal open={isCreateOpen} onClose={() => setIsCreateOpen(false)}>
-        <div className="bg-card rounded-lg w-full">
-          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-card-foreground pr-8">
+      <Modal open={isCreateOpen} onClose={() => setIsCreateOpen(false)} fullScreenOnDesktop={true}>
+        <div className="bg-card rounded-lg w-full h-full flex flex-col p-2">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-card-foreground pr-8 flex-shrink-0">
             Create Newsletter
           </h3>
-          <NewsletterForm
-            action={createNewsletter}
-            closeForm={() => setIsCreateOpen(false)}
-          />
+          <div className="flex-1 overflow-y-auto px-2">
+            <NewsletterForm
+              action={createNewsletter}
+              closeForm={() => setIsCreateOpen(false)}
+            />
+          </div>
         </div>
       </Modal>
 
-      <Modal open={isEditOpen} onClose={() => setIsEditOpen(false)}>
-        <div className="bg-card rounded-lg w-full">
-          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-card-foreground pr-8">
+      <Modal open={isEditOpen} onClose={() => setIsEditOpen(false)} fullScreenOnDesktop={true}>
+        <div className="bg-card rounded-lg w-full h-full flex flex-col p-2">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-card-foreground pr-8 flex-shrink-0">
             Edit Newsletter
           </h3>
-          <NewsletterForm
-            defaultValues={newsletterFields}
-            action={(data) => updateNewsletter(selectedNewsletterId!, data)}
-            closeForm={() => setIsEditOpen(false)}
-          />
+          <div className="flex-1 overflow-y-auto px-2">
+            <NewsletterForm
+              defaultValues={newsletterFields}
+              action={(data) => updateNewsletter(selectedNewsletterId!, data)}
+              closeForm={() => setIsEditOpen(false)}
+            />
+          </div>
         </div>
       </Modal>
 

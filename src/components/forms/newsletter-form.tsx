@@ -92,7 +92,7 @@ const NewsletterForm: React.FC<NewsletterFormProps> = ({
               <FormControl>
                 <textarea
                   placeholder="Write your newsletter content here..."
-                  className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex min-h-[120px] sm:min-h-[200px] max-h-[300px] sm:max-h-[400px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y overflow-y-auto transition-colors"
                   {...field}
                 />
               </FormControl>
