@@ -26,7 +26,7 @@ interface EmailData {
 
 // Constants
 const EMAILS_PER_DAY = 99; // Leave 1 email buffer for other system emails
-const FROM_EMAIL = "Community Hub <onboarding@resend.dev>"; // Resend's verified testing domain
+const FROM_EMAIL = "delivered@resend.dev"; // Resend's verified testing domain
 
 /**
  * Send emails immediately for small subscriber lists or handle failures for larger lists
@@ -69,15 +69,20 @@ export async function sendImmediateEmails({
       // Send emails immediately
       for (const subscriber of subscribers) {
         try {
+          console.log(`Attempting to send email to: ${subscriber.email}`);
           await sendSingleEmailDirect({
             recipientEmail: subscriber.email,
             recipientName: subscriber.name,
             title,
             content,
           });
+          console.log(`✅ Successfully sent email to: ${subscriber.email}`);
           successCount++;
         } catch (error) {
-          console.error(`Failed to send email to ${subscriber.email}:`, error);
+          console.error(
+            `❌ Failed to send email to ${subscriber.email}:`,
+            error
+          );
           failedEmails.push({
             email: subscriber.email,
             name: subscriber.name,
@@ -146,6 +151,10 @@ async function sendSingleEmailDirect({
   title: string;
   content: string;
 }) {
+  console.log(`🔍 Starting email send for: ${recipientEmail}`);
+  console.log(`📧 Title: ${title}`);
+  console.log(`📝 Content length: ${content.length} characters`);
+
   // Generate unsubscribe URL
   const subscriber = await db
     .select({ unsubscribeToken: subscriberTable.unsubscribeToken })
@@ -154,20 +163,39 @@ async function sendSingleEmailDirect({
     .limit(1);
 
   const unsubscribeUrl = subscriber[0]
-    ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${subscriber[0].unsubscribeToken}`
-    : `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${encodeURIComponent(recipientEmail)}`;
+    ? `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?token=${subscriber[0].unsubscribeToken}`
+    : `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?token=${encodeURIComponent(recipientEmail)}`;
+
+  console.log(`🔗 Unsubscribe URL: ${unsubscribeUrl}`);
 
   // Render the email template
-  const emailHtml = await render(
-    NewsletterEmail({
-      title,
-      content,
-      recipientName: recipientName || undefined,
-      unsubscribeUrl,
-    })
-  );
+  console.log(`🎨 Rendering email template...`);
+  let emailHtml: string;
+  try {
+    emailHtml = await render(
+      NewsletterEmail({
+        title,
+        content,
+        recipientName: recipientName || undefined,
+        unsubscribeUrl,
+      })
+    );
+    console.log(`✅ Email template rendered successfully`);
+    console.log(`📄 HTML length: ${emailHtml.length} characters`);
+
+    // Show first 200 characters of rendered HTML for debugging
+    console.log(`📄 HTML preview:`, emailHtml.substring(0, 200) + "...");
+  } catch (templateError) {
+    console.error(`🚫 Template rendering failed:`, templateError);
+    throw new Error(`Template rendering error: ${templateError}`);
+  }
 
   // Send the email via Resend
+  console.log(`📤 Sending email via Resend...`);
+  console.log(`📧 FROM: ${FROM_EMAIL}`);
+  console.log(`📧 TO: ${recipientEmail}`);
+  console.log(`📧 SUBJECT: ${title}`);
+
   const { data, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: [recipientEmail],
@@ -176,10 +204,12 @@ async function sendSingleEmailDirect({
   });
 
   if (error) {
+    console.error(`🚫 Resend API Error:`, error);
     throw new Error(`Resend error: ${error.message}`);
   }
 
-  console.log(`Successfully sent email to ${recipientEmail} (ID: ${data?.id})`);
+  console.log(`🎉 Email sent successfully! Resend ID: ${data?.id}`);
+  console.log(`📊 Resend Response:`, data);
 }
 
 /**
