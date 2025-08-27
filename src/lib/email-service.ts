@@ -163,8 +163,8 @@ async function sendSingleEmailDirect({
     .limit(1);
 
   const unsubscribeUrl = subscriber[0]
-    ? `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?token=${subscriber[0].unsubscribeToken}`
-    : `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?token=${encodeURIComponent(recipientEmail)}`;
+    ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${subscriber[0].unsubscribeToken}`
+    : `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${encodeURIComponent(recipientEmail)}`;
 
   console.log(`🔗 Unsubscribe URL: ${unsubscribeUrl}`);
 
@@ -367,7 +367,7 @@ async function sendSingleEmail(emailData: EmailData) {
   }
 
   // Generate unsubscribe URL (you'll need to implement the unsubscribe endpoint)
-  const unsubscribeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe?token=${encodeURIComponent(recipientEmail)}`;
+  const unsubscribeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${encodeURIComponent(recipientEmail)}`;
 
   // Render the email template
   const emailHtml = await render(
