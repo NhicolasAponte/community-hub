@@ -5,6 +5,7 @@ import { subscriberTable, emailQueueTable, newsletterTable } from "@/db/schema";
 import { eq, and, lte, count } from "drizzle-orm";
 import NewsletterEmail from "@/emails/newsletter-template";
 import { randomBytes } from "crypto";
+import { queueEmailsForImmediateProcessing } from "./email-queue-processor";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -29,7 +30,7 @@ const EMAILS_PER_DAY = 99; // Leave 1 email buffer for other system emails
 const FROM_EMAIL = "delivered@resend.dev"; // Resend's verified testing domain
 
 /**
- * Send emails immediately for small subscriber lists or handle failures for larger lists
+ * Queue emails for rate-limited sending to avoid hitting Resend's rate limits
  */
 export async function sendImmediateEmails({
   newsletterId,
@@ -37,95 +38,33 @@ export async function sendImmediateEmails({
   content,
 }: QueueEmailOptions) {
   try {
-    // Get all active subscribers
-    const subscribers = await db
-      .select()
-      .from(subscriberTable)
-      .where(eq(subscriberTable.subscribed, true));
+    console.log(`🚀 Queueing newsletter emails for rate-limited sending`);
 
-    if (subscribers.length === 0) {
-      console.log("No active subscribers found");
+    // Use the new rate-limited queue processor
+    const result = await queueEmailsForImmediateProcessing({
+      newsletterId,
+      title,
+      content,
+    });
+
+    if (result.success) {
+      console.log(`✅ Successfully queued emails: ${result.message}`);
       return {
         success: true,
-        message: "No subscribers to send to",
-        stats: { immediate: 0, queued: 0 },
-      };
-    }
-
-    console.log(`Found ${subscribers.length} subscribers`);
-
-    // If 99 or fewer subscribers, send immediately
-    if (subscribers.length <= EMAILS_PER_DAY) {
-      console.log(`Sending ${subscribers.length} emails immediately`);
-
-      let successCount = 0;
-      let failureCount = 0;
-      const failedEmails: Array<{
-        email: string;
-        name: string | null;
-        error: string;
-      }> = [];
-
-      // Send emails immediately
-      for (const subscriber of subscribers) {
-        try {
-          console.log(`Attempting to send email to: ${subscriber.email}`);
-          await sendSingleEmailDirect({
-            recipientEmail: subscriber.email,
-            recipientName: subscriber.name,
-            title,
-            content,
-          });
-          console.log(`✅ Successfully sent email to: ${subscriber.email}`);
-          successCount++;
-        } catch (error) {
-          console.error(
-            `❌ Failed to send email to ${subscriber.email}:`,
-            error
-          );
-          failedEmails.push({
-            email: subscriber.email,
-            name: subscriber.name,
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
-          failureCount++;
-        }
-      }
-
-      // Queue any failed emails for retry
-      if (failedEmails.length > 0) {
-        console.log(`Queueing ${failedEmails.length} failed emails for retry`);
-
-        const queueEntries = failedEmails.map((failed) => ({
-          newsletterId,
-          recipientEmail: failed.email,
-          recipientName: failed.name,
-          status: "pending" as const,
-          scheduledFor: new Date(Date.now() + 5 * 60 * 1000), // Retry in 5 minutes
-          sentAt: null,
-          attempts: 1, // This is a retry
-          errorMessage: failed.error.substring(0, 500),
-          batchNumber: 0,
-        }));
-
-        await db.insert(emailQueueTable).values(queueEntries);
-      }
-
-      return {
-        success: true,
-        message: `Sent ${successCount} emails immediately${failureCount > 0 ? `, queued ${failureCount} failed emails for retry` : ""}`,
+        message: `${result.message}. Estimated delivery time: ${result.stats?.estimatedTime || "N/A"} minutes.`,
         stats: {
-          immediate: successCount,
-          queued: failureCount,
-          total: subscribers.length,
+          immediate: 0,
+          queued: result.stats?.queued || 0,
+          total: result.stats?.queued || 0,
         },
       };
     } else {
-      // For larger lists, use the queue system
-      console.log(
-        `Large subscriber list (${subscribers.length}), using queue system`
-      );
-      return await queueNewsletterEmails({ newsletterId, title, content });
+      console.error(`❌ Failed to queue emails: ${result.message}`);
+      return {
+        success: false,
+        message: result.message,
+        error: result.error,
+      };
     }
   } catch (error) {
     console.error("Error in sendImmediateEmails:", error);
