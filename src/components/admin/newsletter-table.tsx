@@ -1,46 +1,65 @@
 import React, { useState } from "react";
-import { Vendor } from "@/lib/data-model/schema-types";
+import { Newsletter } from "@/lib/data-model/schema-types";
 import { Pencil, Trash } from "lucide-react";
 import ConfirmDeleteModal from "@/components/cards/confirm-delete-modal";
 
-interface VendorTableProps {
-  vendors: Vendor[];
-  onEdit: (vendor: Vendor) => void;
-  onDelete: (vendorId: string) => void;
+interface NewsletterTableProps {
+  newsletters: Newsletter[];
+  onEdit: (newsletter: Newsletter) => void;
+  onDelete: (newsletterId: string) => void;
 }
 
-const VendorTable: React.FC<VendorTableProps> = ({
-  vendors,
+const NewsletterTable: React.FC<NewsletterTableProps> = ({
+  newsletters,
   onEdit,
   onDelete,
 }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [selectedNewsletter, setSelectedNewsletter] =
+    useState<Newsletter | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleDeleteClick = (vendor: Vendor) => {
-    setSelectedVendor(vendor);
+  const handleDeleteClick = (newsletter: Newsletter) => {
+    setSelectedNewsletter(newsletter);
     setConfirmOpen(true);
   };
 
   const handleConfirmDelete = () => {
-    if (selectedVendor) {
-      onDelete(selectedVendor.id);
+    if (selectedNewsletter) {
+      onDelete(selectedNewsletter.id);
     }
     setConfirmOpen(false);
-    setSelectedVendor(null);
+    setSelectedNewsletter(null);
   };
 
-  const filteredVendors = vendors.filter((vendor) =>
-    vendor.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredNewsletters = newsletters.filter((newsletter) =>
+    newsletter.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const truncateContent = (content: string, maxLength: number = 100) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength).trim() + "...";
+  };
 
   return (
     <div className="space-y-4 w-full max-w-full overflow-hidden">
       <div className="w-full">
         <input
           type="text"
-          placeholder="Search vendors by name..."
+          placeholder="Search newsletters by title..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full max-w-sm px-4 py-2 text-sm sm:text-base border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
@@ -49,24 +68,24 @@ const VendorTable: React.FC<VendorTableProps> = ({
 
       {/* Mobile Card View */}
       <div className="block md:hidden space-y-3">
-        {filteredVendors.length === 0 ? (
+        {filteredNewsletters.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No vendors found.
+            No newsletters found.
           </div>
         ) : (
-          filteredVendors.map((vendor) => (
-            <div key={vendor.id} className="bg-card border border-border rounded-lg p-4 space-y-3 w-full">
+          filteredNewsletters.map((newsletter) => (
+            <div key={newsletter.id} className="bg-card border border-border rounded-lg p-4 space-y-3 w-full">
               <div className="flex justify-between items-start gap-2">
-                <h3 className="font-semibold text-foreground text-sm flex-1 min-w-0 break-words">{vendor.name}</h3>
+                <h3 className="font-semibold text-foreground text-sm flex-1 min-w-0 break-words">{newsletter.title}</h3>
                 <div className="flex gap-2 flex-shrink-0">
                   <button
-                    onClick={() => onEdit(vendor)}
+                    onClick={() => onEdit(newsletter)}
                     className="flex items-center gap-1 px-2 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-primary-foreground transition"
                   >
                     <Pencil className="w-3 h-3" />
                   </button>
                   <button
-                    onClick={() => handleDeleteClick(vendor)}
+                    onClick={() => handleDeleteClick(newsletter)}
                     className="flex items-center gap-1 px-2 py-1 text-xs border border-destructive text-destructive rounded hover:bg-destructive hover:text-destructive-foreground transition"
                   >
                     <Trash className="w-3 h-3" />
@@ -74,12 +93,8 @@ const VendorTable: React.FC<VendorTableProps> = ({
                 </div>
               </div>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <p><span className="font-medium">Description:</span> <span className="break-words">{vendor.description}</span></p>
-                {vendor.email && <p><span className="font-medium">Email:</span> <span className="break-words">{vendor.email}</span></p>}
-                {vendor.phone && <p><span className="font-medium">Phone:</span> {vendor.phone}</p>}
-                {vendor.address && <p><span className="font-medium">Address:</span> <span className="break-words">{vendor.address}</span></p>}
-                {vendor.services && <p><span className="font-medium">Services:</span> <span className="break-words">{vendor.services}</span></p>}
-                {vendor.links && <p><span className="font-medium">Links:</span> <span className="break-words">{vendor.links}</span></p>}
+                <p><span className="font-medium">Date:</span> {formatDate(newsletter.date)}</p>
+                <p><span className="font-medium">Content:</span> <span className="break-words">{truncateContent(newsletter.content, 150)}</span></p>
               </div>
             </div>
           ))
@@ -91,34 +106,38 @@ const VendorTable: React.FC<VendorTableProps> = ({
         <table className="min-w-full table-auto bg-card border border-border rounded-md">
           <thead>
             <tr className="bg-muted text-left text-sm font-semibold text-muted-foreground">
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Description</th>
+              <th className="px-4 py-3">Title</th>
+              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Content Preview</th>
               <th className="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredVendors.map((vendor) => (
+            {filteredNewsletters.map((newsletter) => (
               <tr
-                key={vendor.id}
+                key={newsletter.id}
                 className="border-t border-border hover:bg-muted/50 transition-colors"
               >
                 <td className="px-4 py-2 text-sm text-foreground max-w-[200px] truncate">
-                  {vendor.name}
+                  {newsletter.title}
+                </td>
+                <td className="px-4 py-2 text-sm text-muted-foreground max-w-[120px] truncate">
+                  {formatDate(newsletter.date)}
                 </td>
                 <td className="px-4 py-2 text-sm text-muted-foreground max-w-[300px] truncate">
-                  {vendor.description}
+                  {truncateContent(newsletter.content)}
                 </td>
                 <td className="px-4 py-2 text-center">
                   <div className="inline-flex gap-x-2 justify-center">
                     <button
-                      onClick={() => onEdit(vendor)}
+                      onClick={() => onEdit(newsletter)}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-primary text-primary rounded hover:bg-primary hover:text-primary-foreground transition"
                     >
                       <Pencil className="w-4 h-4" />
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteClick(vendor)}
+                      onClick={() => handleDeleteClick(newsletter)}
                       className="flex items-center gap-1 px-3 py-1.5 text-sm border border-destructive text-destructive rounded hover:bg-destructive hover:text-destructive-foreground transition"
                     >
                       <Trash className="w-4 h-4" />
@@ -128,13 +147,13 @@ const VendorTable: React.FC<VendorTableProps> = ({
                 </td>
               </tr>
             ))}
-            {filteredVendors.length === 0 && (
+            {filteredNewsletters.length === 0 && (
               <tr>
                 <td
-                  colSpan={3}
+                  colSpan={4}
                   className="px-4 py-6 text-center text-muted-foreground text-sm"
                 >
-                  No vendors found.
+                  No newsletters found.
                 </td>
               </tr>
             )}
@@ -146,10 +165,10 @@ const VendorTable: React.FC<VendorTableProps> = ({
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirmDelete}
-        vendorName={selectedVendor?.name}
+        vendorName={selectedNewsletter?.title}
       />
     </div>
   );
 };
 
-export default VendorTable;
+export default NewsletterTable;

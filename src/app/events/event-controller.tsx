@@ -1,5 +1,6 @@
 "use client";
 import EventList from '@/components/events/event-list';
+import EventCalendar from '@/components/events/event-calendar';
 import { Event } from '@/lib/data-model/schema-types';
 import React, { useState } from 'react';
 
@@ -44,9 +45,7 @@ const EventController = ({ events }: EventControllerProps) => {
         </div>
       ) : (
         <div>
-          <div className="p-8 text-center text-muted-foreground border border-border rounded-lg bg-card">
-            Calendar view coming soon!
-          </div>
+          <EventCalendar events={events} />
         </div>
       )}
     </div>
