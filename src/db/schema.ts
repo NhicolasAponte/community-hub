@@ -65,3 +65,54 @@ export const emailQueueTable = dbSchema.table("email_queue", {
   errorMessage: varchar("error_message", { length: 500 }),
   batchNumber: integer("batch_number").notNull(), // Which day/batch this email belongs to
 });
+
+// Auth.js tables (for future use or if switching from JWT to database sessions)
+export const usersTable = dbSchema.table("user", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  name: varchar("name", { length: 255 }),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  emailVerified: timestamp("emailVerified"),
+  image: varchar("image", { length: 255 }),
+  role: varchar("role", { length: 50 }).default("user").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const accountsTable = dbSchema.table("account", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  type: varchar("type", { length: 255 }).notNull(),
+  provider: varchar("provider", { length: 255 }).notNull(),
+  providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
+  refresh_token: text("refresh_token"),
+  access_token: text("access_token"),
+  expires_at: integer("expires_at"),
+  token_type: varchar("token_type", { length: 255 }),
+  scope: varchar("scope", { length: 255 }),
+  id_token: text("id_token"),
+  session_state: varchar("session_state", { length: 255 }),
+});
+
+// Optional: Database sessions (only needed if not using JWT)
+export const sessionsTable = dbSchema.table("session", {
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
+  sessionToken: varchar("sessionToken", { length: 255 }).notNull().unique(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  expires: timestamp("expires").notNull(),
+});
+
+// Optional: Email verification tokens (for magic link auth)
+export const verificationTokensTable = dbSchema.table("verificationToken", {
+  identifier: varchar("identifier", { length: 255 }).notNull(),
+  token: varchar("token", { length: 255 }).notNull(),
+  expires: timestamp("expires").notNull(),
+});
+
+// Create composite indexes for better performance
+export const accountsIndex = accountsTable;
+export const sessionsIndex = sessionsTable;
+export const verificationTokensIndex = verificationTokensTable;

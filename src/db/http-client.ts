@@ -17,6 +17,11 @@ export {
   newsletterTable,
   subscriberTable,
   emailQueueTable,
+  // Auth tables
+  usersTable,
+  accountsTable,
+  sessionsTable,
+  verificationTokensTable,
 } from "./schema";
 
 // use neon driver over WebSockets

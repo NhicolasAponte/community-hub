@@ -8,6 +8,13 @@
       "when": 1755969446597,
       "tag": "0000_sleepy_luckman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1758066688234,
+      "tag": "0001_awesome_wendell_rand",
+      "breakpoints": true
     }
   ]
 }

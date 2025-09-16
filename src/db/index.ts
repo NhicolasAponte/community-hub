@@ -10,5 +10,10 @@ export {
   newsletterTable,
   subscriberTable,
   emailQueueTable,
+  // Auth tables
+  usersTable,
+  accountsTable,
+  sessionsTable,
+  verificationTokensTable,
 } from "./http-client";
 export type { DB } from "./http-client";
