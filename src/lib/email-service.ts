@@ -1,208 +1,142 @@
+/**
+ * Email Service Module
+ *
+ * This module handles all email operations for the community hub, including:
+ * - Newsletter subscription management
+ * - Bulk email sending with rate limiting and batching
+ * - Email queue management for large subscriber lists
+ * - Unsubscribe handling
+ *
+ * Key features:
+ * - Respects Resend's 100 email batch limit
+ * - Implements rate limiting to avoid API limits
+ * - Queues emails for large lists to process over multiple days
+ * - Proper error handling and retry logic
+ */
+
 import { Resend } from "resend";
 import { render } from "@react-email/render";
 import { db, subscriberTable, emailQueueTable, newsletterTable } from "@/db";
-import { eq, and, lte, inArray } from "drizzle-orm";
+import { eq, and, lte, inArray, sql } from "drizzle-orm";
 import NewsletterEmail from "@/emails/newsletter-template";
 import { randomBytes } from "crypto";
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
-export interface SendNewsletterOptions {
-  title: string;
-  content: string;
-}
+// ============================================================================
+// CONSTANTS AND TYPES
+// ============================================================================
 
-// Constants
+// Email status constants
+export const EMAIL_STATUS = {
+  PENDING: "pending",
+  SENT: "sent",
+  FAILED: "failed",
+} as const;
+
+export type EmailStatus = (typeof EMAIL_STATUS)[keyof typeof EMAIL_STATUS];
+
+// Configuration constants
 const BATCH_SIZE = 100; // Resend's maximum batch size
 const FROM_EMAIL = "delivered@resend.dev"; // Resend's verified testing domain
+const RATE_LIMIT_DELAY = 1000; // 1 second between batches
 
-/**
- * Send newsletter emails using Resend's batch API
- * Handles up to 100 emails per batch with automatic batching for larger lists
- */
-export async function sendNewsletterEmails({
-  title,
-  content,
-}: SendNewsletterOptions) {
-  try {
-    // Get all active subscribers
-    const subscribers = await db
-      .select()
-      .from(subscriberTable)
-      .where(eq(subscriberTable.subscribed, true));
-
-    if (subscribers.length === 0) {
-      console.log("No active subscribers found");
-      return {
-        success: true,
-        message: "No subscribers to send to",
-        stats: { totalSent: 0, totalBatches: 0, failures: 0 },
-      };
-    }
-
-    console.log(`Found ${subscribers.length} subscribers`);
-
-    // Prepare email data for all subscribers
-    const emailPromises = subscribers.map(async (subscriber) => {
-      // Generate unsubscribe URL
-      const unsubscribeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${subscriber.unsubscribeToken}`;
-
-      // Render the email template
-      const emailHtml = await render(
-        NewsletterEmail({
-          title,
-          content,
-          recipientName: subscriber.name || undefined,
-          unsubscribeUrl,
-        })
-      );
-
-      return {
-        from: FROM_EMAIL,
-        to: [subscriber.email],
-        subject: title,
-        html: emailHtml,
-      };
-    });
-
-    // Wait for all email templates to be rendered
-    console.log("Rendering email templates...");
-    const emailsToSend = await Promise.all(emailPromises);
-
-    // Split into batches of 100 (Resend's limit)
-    const batches = [];
-    for (let i = 0; i < emailsToSend.length; i += BATCH_SIZE) {
-      batches.push(emailsToSend.slice(i, i + BATCH_SIZE));
-    }
-
-    console.log(
-      `Sending ${emailsToSend.length} emails in ${batches.length} batches`
-    );
-
-    let totalSent = 0;
-    let totalFailures = 0;
-    const failedEmails: string[] = [];
-
-    // Send each batch
-    for (let i = 0; i < batches.length; i++) {
-      const batch = batches[i];
-      console.log(
-        `Sending batch ${i + 1}/${batches.length} (${batch.length} emails)`
-      );
-
-      try {
-        const { data, error } = await resend.batch.send(batch);
-
-        if (error) {
-          console.error(`❌ Batch ${i + 1} failed:`, error);
-          totalFailures += batch.length;
-          failedEmails.push(...batch.map((email) => email.to[0]));
-        } else {
-          console.log(`✅ Batch ${i + 1} sent successfully`);
-          console.log(`📊 Batch response:`, data);
-          totalSent += batch.length;
-        }
-
-        // Add delay between batches to respect rate limits (2 requests/second)
-        if (i < batches.length - 1) {
-          console.log("Waiting 1 second before next batch...");
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      } catch (error) {
-        console.error(`❌ Error sending batch ${i + 1}:`, error);
-        totalFailures += batch.length;
-        failedEmails.push(...batch.map((email) => email.to[0]));
-      }
-    }
-
-    const results = {
-      success: totalSent > 0,
-      message: `Newsletter sent: ${totalSent} successful, ${totalFailures} failed`,
-      stats: {
-        totalSent,
-        totalBatches: batches.length,
-        failures: totalFailures,
-        failedEmails: failedEmails.length > 0 ? failedEmails : undefined,
-      },
-    };
-
-    console.log("📊 Final results:", results);
-    return results;
-  } catch (error) {
-    console.error("Error in sendNewsletterEmails:", error);
-    return {
-      success: false,
-      message: "Failed to send newsletter emails",
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
+// Type definitions
+export interface SubscriberData {
+  email: string;
+  name: string | null;
+  unsubscribeToken: string;
 }
 
+export interface EmailResult {
+  success: boolean;
+  message: string;
+  totalSent: number;
+  totalFailures: number;
+  error?: string;
+}
+
+export interface QueueStats {
+  pending: number;
+  sent: number;
+  failed: number;
+  totalInQueue: number;
+}
+
+export interface ProcessResult {
+  success: boolean;
+  message: string;
+  processed: number;
+  successCount: number;
+  failureCount: number;
+  error?: string;
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
 /**
- * Send a single test email (useful for testing purposes)
+ * Render email template for a subscriber
  */
-export async function sendTestEmail({
-  recipientEmail,
-  recipientName,
+async function renderEmailTemplate({
   title,
   content,
+  subscriber,
 }: {
-  recipientEmail: string;
-  recipientName?: string;
   title: string;
   content: string;
+  subscriber: SubscriberData;
 }) {
+  const unsubscribeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${subscriber.unsubscribeToken}`;
+
+  return await render(
+    NewsletterEmail({
+      title,
+      content,
+      recipientName: subscriber.name || undefined,
+      unsubscribeUrl,
+    })
+  );
+}
+
+/**
+ * Send a batch of emails via Resend
+ */
+async function sendEmailBatch(
+  emails: Array<{
+    from: string;
+    to: string[];
+    subject: string;
+    html: string;
+  }>
+): Promise<{ success: boolean; sentCount: number; failureCount: number }> {
   try {
-    console.log(`🔍 Sending test email to: ${recipientEmail}`);
-
-    // Generate a dummy unsubscribe URL for test
-    const unsubscribeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=test`;
-
-    // Render the email template
-    const emailHtml = await render(
-      NewsletterEmail({
-        title,
-        content,
-        recipientName,
-        unsubscribeUrl,
-      })
-    );
-
-    // Send the email via Resend
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: [recipientEmail],
-      subject: title,
-      html: emailHtml,
-    });
+    const { error } = await resend.batch.send(emails);
 
     if (error) {
-      console.error(`🚫 Test email failed:`, error);
-      return {
-        success: false,
-        message: `Failed to send test email: ${error.message}`,
-        error: error.message,
-      };
+      console.error("❌ Batch send failed:", error);
+      return { success: false, sentCount: 0, failureCount: emails.length };
     }
 
-    console.log(`✅ Test email sent successfully! Resend ID: ${data?.id}`);
-    return {
-      success: true,
-      message: "Test email sent successfully",
-      emailId: data?.id,
-    };
+    console.log(`✅ Batch sent successfully (${emails.length} emails)`);
+    return { success: true, sentCount: emails.length, failureCount: 0 };
   } catch (error) {
-    console.error("Error sending test email:", error);
-    return {
-      success: false,
-      message: "Failed to send test email",
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+    console.error("❌ Error sending batch:", error);
+    return { success: false, sentCount: 0, failureCount: emails.length };
   }
 }
+
+// ============================================================================
+// PUBLIC API FUNCTIONS
+// ============================================================================
 
 /**
  * Add a new subscriber to the newsletter
+ *
+ * @param email - The subscriber's email address
+ * @param name - Optional name of the subscriber
+ * @returns Promise with success status and message
  */
 export async function addSubscriber(email: string, name?: string) {
   try {
@@ -230,6 +164,9 @@ export async function addSubscriber(email: string, name?: string) {
 
 /**
  * Unsubscribe a user from the newsletter
+ *
+ * @param token - The unique unsubscribe token
+ * @returns Promise with success status and message
  */
 export async function unsubscribeUser(token: string) {
   try {
@@ -253,35 +190,13 @@ export async function unsubscribeUser(token: string) {
 }
 
 /**
- * Get subscriber statistics
- */
-export async function getSubscriberStats() {
-  try {
-    const totalSubscribers = await db
-      .select()
-      .from(subscriberTable)
-      .where(eq(subscriberTable.subscribed, true));
-
-    return {
-      success: true,
-      stats: {
-        totalActiveSubscribers: totalSubscribers.length,
-        estimatedBatches: Math.ceil(totalSubscribers.length / BATCH_SIZE),
-      },
-    };
-  } catch (error) {
-    console.error("Error getting subscriber stats:", error);
-    return {
-      success: false,
-      message: "Failed to get subscriber statistics",
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
-}
-
-/**
  * Send immediate emails (up to 100) and queue the rest
  * This is the main function called when creating a newsletter
+ *
+ * @param newsletterId - The ID of the newsletter to send
+ * @param title - The newsletter title
+ * @param content - The newsletter content
+ * @returns Promise with processing results including immediate and queued counts
  */
 export async function sendImmediateEmails({
   newsletterId,
@@ -322,7 +237,12 @@ export async function sendImmediateEmails({
     const queuedSubscribers = subscribers.slice(immediateCount);
 
     // Send immediate emails
-    let immediateResult = { success: true, totalSent: 0, message: "" };
+    let immediateResult: EmailResult = {
+      success: true,
+      totalSent: 0,
+      totalFailures: 0,
+      message: "",
+    };
     if (immediateSubscribers.length > 0) {
       console.log(
         `📤 Sending to ${immediateSubscribers.length} immediate recipients`
@@ -340,12 +260,7 @@ export async function sendImmediateEmails({
       console.log(
         `📝 Queuing ${queuedSubscribers.length} emails for later processing`
       );
-      queueResult = await addEmailsToQueue(
-        newsletterId,
-        queuedSubscribers,
-        title,
-        content
-      );
+      queueResult = await addEmailsToQueue(newsletterId, queuedSubscribers);
     }
 
     // Compile results
@@ -377,34 +292,29 @@ export async function sendImmediateEmails({
   }
 }
 
+// ============================================================================
+// INTERNAL HELPER FUNCTIONS
+// ============================================================================
+
 /**
  * Send emails to a list of subscribers (helper function)
+ * Handles batching, rate limiting, and error reporting
  */
 async function sendEmailsToSubscribers(
-  subscribers: Array<{
-    email: string;
-    name: string | null;
-    unsubscribeToken: string;
-  }>,
+  subscribers: SubscriberData[],
   title: string,
   content: string
-) {
+): Promise<EmailResult> {
   try {
-    // Prepare email data for all subscribers
+    console.log(`📤 Preparing to send ${subscribers.length} emails`);
+
+    // Render email templates for all subscribers
     const emailPromises = subscribers.map(async (subscriber) => {
-      // Generate unsubscribe URL
-      const unsubscribeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/email/unsubscribe?token=${subscriber.unsubscribeToken}`;
-
-      // Render the email template
-      const emailHtml = await render(
-        NewsletterEmail({
-          title,
-          content,
-          recipientName: subscriber.name || undefined,
-          unsubscribeUrl,
-        })
-      );
-
+      const emailHtml = await renderEmailTemplate({
+        title,
+        content,
+        subscriber,
+      });
       return {
         from: FROM_EMAIL,
         to: [subscriber.email],
@@ -413,7 +323,6 @@ async function sendEmailsToSubscribers(
       };
     });
 
-    // Wait for all email templates to be rendered
     console.log("Rendering email templates...");
     const emailsToSend = await Promise.all(emailPromises);
 
@@ -437,25 +346,14 @@ async function sendEmailsToSubscribers(
         `Sending batch ${i + 1}/${batches.length} (${batch.length} emails)`
       );
 
-      try {
-        const { data, error } = await resend.batch.send(batch);
+      const result = await sendEmailBatch(batch);
+      totalSent += result.sentCount;
+      totalFailures += result.failureCount;
 
-        if (error) {
-          console.error(`❌ Batch ${i + 1} failed:`, error);
-          totalFailures += batch.length;
-        } else {
-          console.log(`✅ Batch ${i + 1} sent successfully`);
-          totalSent += batch.length;
-        }
-
-        // Add delay between batches to respect rate limits (2 requests/second)
-        if (i < batches.length - 1) {
-          console.log("Waiting 1 second before next batch...");
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      } catch (error) {
-        console.error(`❌ Error sending batch ${i + 1}:`, error);
-        totalFailures += batch.length;
+      // Add delay between batches to respect rate limits (2 requests/second)
+      if (i < batches.length - 1) {
+        console.log("Waiting 1 second before next batch...");
+        await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
       }
     }
 
@@ -479,16 +377,11 @@ async function sendEmailsToSubscribers(
 
 /**
  * Add emails to the queue for later processing
+ * Schedules emails across multiple days to respect daily limits
  */
 async function addEmailsToQueue(
   newsletterId: string,
-  subscribers: Array<{
-    email: string;
-    name: string | null;
-    unsubscribeToken: string;
-  }>,
-  title: string,
-  content: string
+  subscribers: SubscriberData[]
 ) {
   try {
     console.log(
@@ -514,7 +407,7 @@ async function addEmailsToQueue(
         newsletterId,
         recipientEmail: subscriber.email,
         recipientName: subscriber.name,
-        status: "pending" as const,
+        status: EMAIL_STATUS.PENDING,
         scheduledFor: scheduledDate,
         attempts: 0,
         batchNumber: currentBatchNumber,
@@ -547,6 +440,9 @@ async function addEmailsToQueue(
 
 /**
  * Process pending emails from the queue (up to 100 per day)
+ * This function should be called by a cron job or scheduled task
+ *
+ * @returns Promise with processing results including success/failure counts
  */
 export async function processPendingEmails() {
   try {
@@ -565,7 +461,7 @@ export async function processPendingEmails() {
       .from(emailQueueTable)
       .where(
         and(
-          eq(emailQueueTable.status, "pending"),
+          eq(emailQueueTable.status, EMAIL_STATUS.PENDING),
           lte(emailQueueTable.scheduledFor, new Date())
         )
       )
@@ -620,34 +516,56 @@ export async function processPendingEmails() {
         `📤 Processing ${newsletterEmails.length} emails for newsletter: ${newsletter.title}`
       );
 
-      // Get subscriber tokens for unsubscribe URLs
-      const emailsWithTokens = [];
-      for (const email of newsletterEmails) {
-        const [subscriber] = await db
-          .select({ unsubscribeToken: subscriberTable.unsubscribeToken })
-          .from(subscriberTable)
-          .where(eq(subscriberTable.email, email.recipientEmail))
-          .limit(1);
+      // Get all subscriber tokens in a single query
+      const subscriberEmails = newsletterEmails.map((e) => e.recipientEmail);
+      const subscribers = await db
+        .select({
+          email: subscriberTable.email,
+          unsubscribeToken: subscriberTable.unsubscribeToken,
+        })
+        .from(subscriberTable)
+        .where(inArray(subscriberTable.email, subscriberEmails));
 
-        if (subscriber) {
-          emailsWithTokens.push({
-            ...email,
-            unsubscribeToken: subscriber.unsubscribeToken,
-          });
-        } else {
-          console.warn(
-            `Subscriber not found for email: ${email.recipientEmail}`
-          );
-        }
-      }
+      // Create a map for quick lookup
+      const tokenMap = new Map(
+        subscribers.map((s) => [s.email, s.unsubscribeToken])
+      );
+
+      // Build the subscriber data with tokens and maintain mapping to original emails
+      const emailsWithTokens: Array<{
+        id: string;
+        email: string;
+        name: string | null;
+        unsubscribeToken: string;
+      }> = newsletterEmails
+        .map((email) => {
+          const token = tokenMap.get(email.recipientEmail);
+          if (!token) {
+            console.warn(
+              `Subscriber not found for email: ${email.recipientEmail}`
+            );
+            return null;
+          }
+          return {
+            id: email.id,
+            email: email.recipientEmail,
+            name: email.recipientName,
+            unsubscribeToken: token,
+          };
+        })
+        .filter((email): email is NonNullable<typeof email> => email !== null);
 
       // Send emails for this newsletter
-      const result = await sendEmailsToSubscribers(
-        emailsWithTokens.map((email) => ({
-          email: email.recipientEmail,
-          name: email.recipientName,
+      const subscriberData: SubscriberData[] = emailsWithTokens.map(
+        (email) => ({
+          email: email.email,
+          name: email.name,
           unsubscribeToken: email.unsubscribeToken,
-        })),
+        })
+      );
+
+      const result = await sendEmailsToSubscribers(
+        subscriberData,
         newsletter.title,
         newsletter.content
       );
@@ -697,7 +615,8 @@ export async function processPendingEmails() {
 }
 
 /**
- * Mark emails as sent
+ * Mark emails as sent in the queue
+ * Updates status and records sent timestamp
  */
 async function markEmailsAsSent(emailIds: string[]) {
   if (emailIds.length === 0) return;
@@ -705,70 +624,75 @@ async function markEmailsAsSent(emailIds: string[]) {
   await db
     .update(emailQueueTable)
     .set({
-      status: "sent",
+      status: EMAIL_STATUS.SENT,
       sentAt: new Date(),
     })
     .where(inArray(emailQueueTable.id, emailIds));
 }
 
 /**
- * Mark emails as failed and increment attempts
+ * Mark emails as failed and increment attempts counter
+ * Uses batch update for better performance
  */
 async function markEmailsAsFailed(emailIds: string[], errorMessage: string) {
   if (emailIds.length === 0) return;
 
-  // For simplicity, we'll update them one by one to increment attempts
-  for (const id of emailIds) {
-    // First get current attempts count
-    const [currentEmail] = await db
-      .select({ attempts: emailQueueTable.attempts })
-      .from(emailQueueTable)
-      .where(eq(emailQueueTable.id, id))
-      .limit(1);
-
-    const newAttempts = (currentEmail?.attempts || 0) + 1;
-
-    await db
-      .update(emailQueueTable)
-      .set({
-        status: "failed",
-        errorMessage,
-        attempts: newAttempts,
-      })
-      .where(eq(emailQueueTable.id, id));
-  }
+  // Batch update all failed emails
+  await db
+    .update(emailQueueTable)
+    .set({
+      status: EMAIL_STATUS.FAILED,
+      errorMessage,
+      attempts: sql`${emailQueueTable.attempts} + 1`,
+    })
+    .where(inArray(emailQueueTable.id, emailIds));
 }
 
 /**
- * Get queue statistics
+ * Get queue statistics including pending, sent, and failed email counts
+ *
+ * @returns Promise with queue statistics or error information
  */
 export async function getQueueStats() {
   try {
-    const [pendingCount] = await db
-      .select({ count: emailQueueTable.id })
+    // Get all status counts in a single query
+    const stats = await db
+      .select({
+        status: emailQueueTable.status,
+        count: sql<number>`count(*)::int`,
+      })
       .from(emailQueueTable)
-      .where(eq(emailQueueTable.status, "pending"));
+      .groupBy(emailQueueTable.status);
 
-    const [sentCount] = await db
-      .select({ count: emailQueueTable.id })
-      .from(emailQueueTable)
-      .where(eq(emailQueueTable.status, "sent"));
+    // Initialize counters
+    let pending = 0;
+    let sent = 0;
+    let failed = 0;
 
-    const [failedCount] = await db
-      .select({ count: emailQueueTable.id })
-      .from(emailQueueTable)
-      .where(eq(emailQueueTable.status, "failed"));
+    // Populate counters from query results
+    stats.forEach((stat) => {
+      switch (stat.status) {
+        case EMAIL_STATUS.PENDING:
+          pending = stat.count;
+          break;
+        case EMAIL_STATUS.SENT:
+          sent = stat.count;
+          break;
+        case EMAIL_STATUS.FAILED:
+          failed = stat.count;
+          break;
+      }
+    });
+
+    const totalInQueue = pending + sent + failed;
 
     return {
       success: true,
       stats: {
-        pending: pendingCount?.count || 0,
-        sent: sentCount?.count || 0,
-        failed: failedCount?.count || 0,
-        totalInQueue:
-          (pendingCount?.count || 0) +
-          (sentCount?.count || 0) +
-          (failedCount?.count || 0),
+        pending,
+        sent,
+        failed,
+        totalInQueue,
       },
     };
   } catch (error) {
