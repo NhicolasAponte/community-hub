@@ -8,6 +8,17 @@ import * as schema from "./schema";
 const sql = neon(process.env.DATABASE_URL!); // connect to neon database
 export const db = drizzleHTTP(sql, { schema, logger: true });
 export type DB = typeof db;
+
+// Export tables for easier imports
+export {
+  dbSchema,
+  vendorTable,
+  eventTable,
+  newsletterTable,
+  subscriberTable,
+  emailQueueTable,
+} from "./schema";
+
 // use neon driver over WebSockets
 // use if backend uses sessions/interactive transactions with multiple queries per connection
 // const pool = new Pool({ connectionString: process.env.DATABASE_URL! }) // create a pool of connections to the database
