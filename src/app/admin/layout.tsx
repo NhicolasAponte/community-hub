@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import AdminLayoutClient from "@/components/layouts/admin-layout-client";
+import { UserRoles } from "@/lib/data-model/enum-types";
 
 export default async function AdminLayout({
   children,
@@ -15,7 +16,7 @@ export default async function AdminLayout({
   }
 
   // Redirect if not admin
-  if (session.user.role !== "admin") {
+  if (session.user.role !== UserRoles.ADMIN) {
     redirect("/auth/error?error=AccessDenied");
   }
 

@@ -7,6 +7,7 @@ import {
   integer,
   pgSchema,
 } from "drizzle-orm/pg-core";
+import { UserRoles } from "@/lib/data-model/enum-types";
 
 export const dbSchema = pgSchema("dev-schema");
 
@@ -73,7 +74,7 @@ export const usersTable = dbSchema.table("user", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: timestamp("emailVerified"),
   image: varchar("image", { length: 255 }),
-  role: varchar("role", { length: 50 }).default("user").notNull(),
+  role: varchar("role", { length: 50 }).default(UserRoles.USER).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
+import { UserRoles, UserRole } from "@/lib/data-model/enum-types";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Use JWT strategy (no database adapter needed)
@@ -19,10 +20,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       authorize: async (credentials) => {
         // Simple validation schema
-        const parsedCredentials = z.object({
-          email: z.string().email(),
-          password: z.string().min(1),
-        }).safeParse(credentials);
+        const parsedCredentials = z
+          .object({
+            email: z.string().email(),
+            password: z.string().min(1),
+          })
+          .safeParse(credentials);
 
         if (!parsedCredentials.success) return null;
 
@@ -34,12 +37,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           password: process.env.ADMIN_PASSWORD || "admin123",
         };
 
-        if (email === adminCredentials.email && password === adminCredentials.password) {
+        if (
+          email === adminCredentials.email &&
+          password === adminCredentials.password
+        ) {
           return {
             id: "admin",
             name: "Admin User",
             email: adminCredentials.email,
-            role: "admin",
+            role: UserRoles.ADMIN,
           };
         }
 
@@ -98,7 +104,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // Expose role in session for client-side access
     session({ session, token }) {
       if (token.role) {
-        session.user.role = token.role as string;
+        session.user.role = token.role as UserRole;
       }
       return session;
     },
@@ -107,7 +113,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isAdminRoute = nextUrl.pathname.startsWith("/admin");
-      const isAdmin = auth?.user?.role === "admin";
+      const isAdmin = auth?.user?.role === UserRoles.ADMIN;
 
       // Allow access to non-admin routes
       if (!isAdminRoute) {
@@ -130,12 +136,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 /**
  * Helper function to determine user role based on email
  */
-function determineUserRole(email: string | null): string {
-  if (!email) return "user";
+function determineUserRole(email: string | null): UserRole {
+  if (!email) return UserRoles.USER;
 
   // Get admin emails from environment variable
   const adminEmails =
     process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim()) || [];
 
-  return adminEmails.includes(email) ? "admin" : "user";
+  return adminEmails.includes(email) ? UserRoles.ADMIN : UserRoles.USER;
 }
