@@ -4,6 +4,10 @@ import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import { UserRoles, UserRole } from "@/lib/data-model/enum-types";
+import bcrypt from "bcryptjs";
+import { db } from "@/db";
+import { usersTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Use JWT strategy (no database adapter needed)
@@ -31,25 +35,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { email, password } = parsedCredentials.data;
 
-        // Simple admin authentication - replace with your actual logic
-        const adminCredentials = {
-          email: process.env.ADMIN_EMAIL || "admin@example.com",
-          password: process.env.ADMIN_PASSWORD || "admin123",
-        };
+        try {
+          // Look up user in database
+          const [user] = await db
+            .select()
+            .from(usersTable)
+            .where(eq(usersTable.email, email))
+            .limit(1);
 
-        if (
-          email === adminCredentials.email &&
-          password === adminCredentials.password
-        ) {
+          if (!user || !user.hashedPassword) {
+            return null;
+          }
+
+          // Verify password
+          const passwordMatch = await bcrypt.compare(
+            password,
+            user.hashedPassword
+          );
+
+          if (!passwordMatch) {
+            return null;
+          }
+
+          // Return user data for session
           return {
-            id: "admin",
-            name: "Admin User",
-            email: adminCredentials.email,
-            role: UserRoles.ADMIN,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role as UserRole,
           };
+        } catch (error) {
+          console.error("Authentication error:", error);
+          return null;
         }
-
-        return null;
       },
     }),
 

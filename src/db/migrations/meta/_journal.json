@@ -15,6 +15,13 @@
       "when": 1758066688234,
       "tag": "0001_awesome_wendell_rand",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1758071889878,
+      "tag": "0002_tricky_black_panther",
+      "breakpoints": true
     }
   ]
 }

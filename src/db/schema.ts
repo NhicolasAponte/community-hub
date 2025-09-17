@@ -74,6 +74,7 @@ export const usersTable = dbSchema.table("user", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: timestamp("emailVerified"),
   image: varchar("image", { length: 255 }),
+  hashedPassword: varchar("hashed_password", { length: 255 }), // For credentials login
   role: varchar("role", { length: 50 }).default(UserRoles.USER).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
