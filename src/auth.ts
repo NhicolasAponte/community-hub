@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
+import Credentials from "next-auth/providers/credentials";
+import { z } from "zod";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Use JWT strategy (no database adapter needed)
@@ -9,6 +11,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 
   providers: [
+    // Simple credentials provider for admin access
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials) => {
+        // Simple validation schema
+        const parsedCredentials = z.object({
+          email: z.string().email(),
+          password: z.string().min(1),
+        }).safeParse(credentials);
+
+        if (!parsedCredentials.success) return null;
+
+        const { email, password } = parsedCredentials.data;
+
+        // Simple admin authentication - replace with your actual logic
+        const adminCredentials = {
+          email: process.env.ADMIN_EMAIL || "admin@example.com",
+          password: process.env.ADMIN_PASSWORD || "admin123",
+        };
+
+        if (email === adminCredentials.email && password === adminCredentials.password) {
+          return {
+            id: "admin",
+            name: "Admin User",
+            email: adminCredentials.email,
+            role: "admin",
+          };
+        }
+
+        return null;
+      },
+    }),
+
     // Configure Google OAuth
     ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
       ? [
