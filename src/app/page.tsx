@@ -6,7 +6,7 @@ import EventCard from "@/components/events/event-card";
 import VendorCard from "@/components/cards/vendor-card";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
-import { Calendar, Users, Store, ArrowRight, Heart } from "lucide-react";
+import { Calendar, Store, ArrowRight, Heart } from "lucide-react";
 import Link from "next/link";
 
 const events = [
