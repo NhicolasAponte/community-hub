@@ -54,3 +54,13 @@ export const subscriptionFormSchema = z.object({
 });
 
 export type SubscriptionFormData = z.infer<typeof subscriptionFormSchema>;
+
+export const contactFormSchema = z.object({
+  name: z.string().min(1, { message: "Please enter your name" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  phone: z.string().optional(),
+  movingTimeline: z.string().min(1, { message: "Please select your moving timeline" }),
+  message: z.string().min(10, { message: "Please provide more details (at least 10 characters)" }),
+});
+
+export type ContactFormData = z.infer<typeof contactFormSchema>;
